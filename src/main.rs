@@ -1,18 +1,15 @@
-use clap::{Arg, App, ArgSettings, crate_name, crate_authors, crate_description, crate_version};
+use clap::{Clap, crate_authors, crate_description, crate_version};
+
+#[derive(Clap)]
+#[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
+struct Opts {
+    #[clap(long, required=true)]
+    roots: Vec<String>,
+}
 
 fn main() {
-    let matches = App::new(crate_name!())
-        .author(crate_authors!())
-        .about(crate_description!())
-        .version(crate_version!())
-        .arg(Arg::new("roots")
-            .long("roots")
-            .about("set media file's roots")
-            .settings(&[ArgSettings::MultipleOccurrences, ArgSettings::TakesValue])
-            .required(true))
-        .get_matches();
-    let roots: Vec<&str> = matches.values_of("roots").unwrap().collect();
-    for root in roots {
+    let opts: Opts = Opts::parse();
+    for root in opts.roots {
         println!("root: {}", root)
     }
 }
