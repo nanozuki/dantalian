@@ -12,3 +12,7 @@ repository = "https://github.com/nanozuki/dantalian/"
 [dependencies]
 clap = "~3.0.0-beta.2"
 serde = { version = "1.0.118", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.10", features = ["json"] }
+anyhow = "1.0"
+futures = "0.3"

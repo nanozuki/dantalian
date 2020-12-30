@@ -11,7 +11,6 @@ pub enum SubjectType {
 
 #[derive(Deserialize)]
 pub struct SubjectImage {
-    pub description: String,
     pub large: String,
     pub common: String,
     pub medium: String,
