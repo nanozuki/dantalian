@@ -1,8 +1,6 @@
 use clap::{crate_authors, crate_description, crate_version, Clap};
 mod bangumi;
 use anyhow::Result;
-use bangumi::Bangumi;
-use tokio;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
@@ -17,11 +15,18 @@ async fn main() -> Result<()> {
     match opts.subcmd {
         SubCmd::Bgm(sub_opts) => match sub_opts.subcmd {
             BgmSubCmd::Search(search_opts) => {
-                let bgm = Bangumi {};
                 println!("search anime {}", search_opts.keyword);
-                let _ = bgm.search_subject(search_opts.keyword).await?;
-                // tokio::join!(fut);
-                // futures::future::join(fut).await;
+                let _ = bangumi::search_anime(search_opts.keyword).await?;
+                Ok(())
+            }
+            BgmSubCmd::Get(get_opts) => {
+                println!("get subject {}", get_opts.id);
+                let _ = bangumi::get_subject_info(get_opts.id).await?;
+                Ok(())
+            }
+            BgmSubCmd::GetEp(get_opts) => {
+                println!("get subject {}", get_opts.id);
+                let _ = bangumi::get_subject_episode(get_opts.id).await?;
                 Ok(())
             }
         },
@@ -59,6 +64,8 @@ struct BgmCmd {
 #[derive(Clap)]
 enum BgmSubCmd {
     Search(BgmSearchOpt),
+    Get(BgmGetSubjectOpt),
+    GetEp(BgmGetSubjectOpt),
 }
 
 #[derive(Clap)]
@@ -66,4 +73,11 @@ enum BgmSubCmd {
 struct BgmSearchOpt {
     #[clap(short, long, required = true)]
     keyword: String,
+}
+
+#[derive(Clap)]
+#[clap(about = "search keyword")]
+struct BgmGetSubjectOpt {
+    #[clap(short, long, required = true)]
+    id: u32,
 }

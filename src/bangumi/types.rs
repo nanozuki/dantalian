@@ -61,7 +61,7 @@ pub struct SubjectCollection {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct SubjectSmall {
+pub struct SubjectBase {
     pub id: u32,
     pub url: String,
     #[serde(rename = "type")]
@@ -74,7 +74,104 @@ pub struct SubjectSmall {
     pub images: SubjectImage,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
+pub struct SubjectSmall {
+    pub id: u32,
+    pub url: String,
+    #[serde(rename = "type")]
+    pub subject_type: SubjectType,
+    pub name: String,
+    pub name_cn: String,
+    pub summary: String,
+    pub air_date: String,
+    pub air_weekday: u8,
+    pub images: SubjectImage,
+    pub eps: u32,
+    pub eps_count: u32,
+    pub rating: SubjectRating,
+    pub rank: u32,
+    pub collection: SubjectCollection,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct SubjectMedium {
+    pub id: u32,
+    pub url: String,
+    #[serde(rename = "type")]
+    pub subject_type: SubjectType,
+    pub name: String,
+    pub name_cn: String,
+    pub summary: String,
+    pub air_date: String,
+    pub air_weekday: u8,
+    pub images: SubjectImage,
+    pub eps: u32,
+    pub eps_count: u32,
+    pub rating: SubjectRating,
+    pub rank: u32,
+    pub collection: SubjectCollection,
+    pub crt: Vec<Character>,
+    pub staff: Vec<MonoBase>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Character {
+    id: u32,
+    url: String,
+    name: String,
+    images: CharacterImage,
+    name_cn: String,
+    comment: u32,
+    collects: u32,
+    info: MonoInfo,
+    actors: Vec<Actor>,
+    role_name: String, // example: 主角
+}
+
+#[derive(Deserialize, Debug)]
+pub struct CharacterImage {
+    pub large: String,
+    pub medium: String,
+    pub small: String,
+    pub grid: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MonoInfo {
+    name_cn: String,
+    birth: Option<String>,
+    height: Option<String>,
+    gender: Option<String>,
+    alias: MonoInfoAlias,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MonoInfoAlias {
+    jp: Option<String>,
+    kana: Option<String>,
+    nick: Option<String>,
+    romaji: Option<String>,
+    zh: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Actor {
+    id: u32,
+    url: String,
+    name: String,
+    images: Option<CharacterImage>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MonoBase {
+    id: u32,
+    url: String,
+    name: String,
+    images: Option<CharacterImage>,
+}
+
+#[derive(Deserialize_repr, Debug)]
+#[repr(u32)]
 pub enum EpisodeType {
     Honpen = 0,
     Sp = 1,
@@ -85,14 +182,14 @@ pub enum EpisodeType {
     Other = 6,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub enum EpisodeStatus {
     Air,
     Today,
     NA,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Episode {
     pub id: u32,
     pub url: String,
