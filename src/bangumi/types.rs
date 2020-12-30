@@ -73,3 +73,37 @@ pub struct SubjectSmall {
     pub air_weekday: u8,
     pub images: SubjectImage,
 }
+
+#[derive(Deserialize)]
+pub enum EpisodeType {
+    Honpen = 0,
+    Sp = 1,
+    OP = 2,
+    ED = 3,
+    CM = 4,
+    MAD = 5,
+    Other = 6,
+}
+
+#[derive(Deserialize)]
+pub enum EpisodeStatus {
+    Air,
+    Today,
+    NA,
+}
+
+#[derive(Deserialize)]
+pub struct Episode {
+    pub id: u32,
+    pub url: String,
+    #[serde(rename = "type")]
+    pub episode_type: EpisodeType,
+    pub sort: u32,
+    pub name: String,
+    pub name_cn: String,
+    pub duration: String,
+    pub airdate: String,
+    pub comment: u32,
+    pub desc: String,
+    pub status: EpisodeStatus,
+}
