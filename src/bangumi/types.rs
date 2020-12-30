@@ -1,6 +1,8 @@
 use serde::Deserialize;
+use serde_repr::Deserialize_repr;
 
-#[derive(Deserialize)]
+#[derive(Deserialize_repr, Debug)]
+#[repr(u32)]
 pub enum SubjectType {
     Book = 1,
     Anime = 2,
@@ -9,7 +11,7 @@ pub enum SubjectType {
     Real = 6,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SubjectImage {
     pub large: String,
     pub common: String,
@@ -18,7 +20,7 @@ pub struct SubjectImage {
     pub grid: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SubjectRatingCount {
     #[serde(rename = "1")]
     pub s1: u32,
@@ -42,14 +44,14 @@ pub struct SubjectRatingCount {
     pub s10: u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SubjectRating {
     pub total: u32,
     pub score: f32,
     pub count: SubjectRatingCount,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SubjectCollection {
     pub wish: u32,
     pub collect: u32,
@@ -58,7 +60,7 @@ pub struct SubjectCollection {
     pub dropped: u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SubjectSmall {
     pub id: u32,
     pub url: String,
@@ -70,7 +72,4 @@ pub struct SubjectSmall {
     pub air_date: String,
     pub air_weekday: u8,
     pub images: SubjectImage,
-    pub rank: u32,
-    pub rating: SubjectRating,
-    pub collection: SubjectCollection,
 }
