@@ -47,7 +47,7 @@ pub struct SubjectRatingCount {
 #[derive(Deserialize, Debug)]
 pub struct SubjectRating {
     pub total: u32,
-    pub score: f32,
+    pub score: f64,
     pub count: SubjectRatingCount,
 }
 
