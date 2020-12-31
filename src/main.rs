@@ -36,6 +36,9 @@ async fn main() -> Result<()> {
             }
             Ok(())
         }
+        SubCmd::Check(check_opts) => {
+            Ok(())
+        }
     }
 }
 
@@ -43,6 +46,8 @@ async fn main() -> Result<()> {
 enum SubCmd {
     #[clap()]
     Gen(GenCmd),
+    #[clap()]
+    Check(CheckCmd),
     #[clap()]
     Bgm(BgmCmd),
 }
@@ -52,6 +57,17 @@ enum SubCmd {
 struct GenCmd {
     #[clap(long, required = true)]
     roots: Vec<String>,
+}
+
+#[derive(Clap)]
+#[clap(about = "gen nfo files for spci")]
+struct CheckCmd {
+    #[clap(short, long, required = true)]
+    subject: u32,
+    #[clap(long, required = false)]
+    ep: u32,
+    #[clap(long)]
+    all: bool,
 }
 
 #[derive(Clap)]
@@ -65,19 +81,26 @@ struct BgmCmd {
 enum BgmSubCmd {
     Search(BgmSearchOpt),
     Get(BgmGetSubjectOpt),
-    GetEp(BgmGetSubjectOpt),
+    GetEp(BgmGetSubjectEpsOpt),
 }
 
 #[derive(Clap)]
 #[clap(about = "search keyword")]
 struct BgmSearchOpt {
-    #[clap(short, long, required = true)]
+    #[clap(about = "search keyword")]
     keyword: String,
 }
 
 #[derive(Clap)]
-#[clap(about = "search keyword")]
+#[clap(about = "get subject")]
 struct BgmGetSubjectOpt {
-    #[clap(short, long, required = true)]
+    #[clap(about = "subject id")]
+    id: u32,
+}
+
+#[derive(Clap)]
+#[clap(about = "get subject episodes")]
+struct BgmGetSubjectEpsOpt {
+    #[clap(about = "subject id")]
     id: u32,
 }
