@@ -1,6 +1,6 @@
-use clap::{crate_authors, crate_description, crate_version, Clap};
-mod bangumi;
 use anyhow::Result;
+use clap::{crate_authors, crate_description, crate_version, Clap};
+use dantalian::bangumi;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
