@@ -7,6 +7,7 @@ pub struct Generator<'a> {
 }
 
 impl<'a> Generator<'a> {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Generator<'a> {
         let mut g = Generator {
             tt: TinyTemplate::new(),
