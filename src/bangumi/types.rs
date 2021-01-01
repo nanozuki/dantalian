@@ -111,7 +111,7 @@ pub struct SubjectMedium {
     pub rank: u32,
     pub collection: SubjectCollection,
     pub crt: Vec<Character>,
-    pub staff: Vec<MonoBase>,
+    pub staff: Vec<Staff>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -163,11 +163,17 @@ pub struct Actor {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct MonoBase {
+pub struct Staff {
     pub id: u32,
     pub url: String,
     pub name: String,
     pub images: Option<CharacterImage>,
+    pub name_cn: String,
+    pub comment: u32,
+    pub collects: u32,
+    pub info: Option<MonoInfo>,
+    pub role_name: String,
+    pub jobs: Vec<String>,
 }
 
 #[derive(Deserialize_repr, PartialEq, Debug)]
@@ -182,7 +188,7 @@ pub enum EpisodeType {
     Other = 6,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, PartialEq, Debug)]
 pub enum EpisodeStatus {
     Air,
     Today,

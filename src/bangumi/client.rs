@@ -14,6 +14,17 @@ pub async fn search_anime(keyword: String) -> Result<Vec<SubjectBase>> {
     Ok(res_obj.list)
 }
 
+pub struct BgmAnime {
+    pub subject: SubjectMedium,
+    pub episodes: Vec<Episode>,
+}
+
+pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
+    let subject = get_subject_info(id).await?;
+    let episodes = get_subject_episode(id).await?;
+    Ok(BgmAnime { subject, episodes })
+}
+
 pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
     println!("get_subject_info: {}", id);
     let path = format!("/subject/{}?responseGroup=medium", id);

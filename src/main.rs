@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use dantalian::bangumi;
+use dantalian::dantalian::Dantalian;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
@@ -37,6 +38,14 @@ async fn main() -> Result<()> {
             Ok(())
         }
         SubCmd::Check(check_opts) => {
+            let d = Dantalian::new();
+            let data = d.check_anime(check_opts.subject).await?;
+            println!("get anime data:\n{:#?}", &data);
+            let nfos = d.gen_nfos(&data).await?;
+            println!("gen tvshow file:\n{}", &nfos.tvshow);
+            for e in nfos.episodes.iter() {
+                println!("gen episode file:\n{}", &e);
+            }
             Ok(())
         }
     }
@@ -64,10 +73,12 @@ struct GenCmd {
 struct CheckCmd {
     #[clap(short, long, required = true)]
     subject: u32,
+    /*
     #[clap(long, required = false)]
     ep: u32,
     #[clap(long)]
     all: bool,
+    */
 }
 
 #[derive(Clap)]
