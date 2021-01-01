@@ -22,6 +22,7 @@ pub struct Dantalian<'a> {
 }
 
 impl<'a> Dantalian<'a> {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Dantalian<'a> {
         Dantalian {
             nfo_generator: Generator::new(),
