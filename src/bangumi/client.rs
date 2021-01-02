@@ -21,7 +21,7 @@ pub struct BgmAnime {
 
 pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
     let subject = get_subject_info(id).await?;
-    let episodes = get_subject_episode(id).await?;
+    let episodes = get_subject_episodes(id).await?;
     Ok(BgmAnime { subject, episodes })
 }
 
@@ -33,7 +33,7 @@ pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
     Ok(subject)
 }
 
-pub async fn get_subject_episode(id: u32) -> Result<Vec<Episode>> {
+pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
     println!("get_subject_info: {}", id);
     let path = format!("/subject/{}/ep", id);
     let res: EpisodeResponse = request(&path).await?;

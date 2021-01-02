@@ -104,7 +104,6 @@ pub struct Character {
     pub name_cn: String,
     pub comment: u32,
     pub collects: u32,
-    pub info: MonoInfo,
     pub actors: Vec<Actor>,
     pub role_name: String, // example: 主角
 }
@@ -115,14 +114,6 @@ pub struct CharacterImage {
     pub medium: String,
     pub small: String,
     pub grid: String,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct MonoInfo {
-    pub name_cn: Option<String>,
-    pub birth: Option<String>,
-    pub height: Option<String>,
-    pub gender: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -142,7 +133,6 @@ pub struct Staff {
     pub name_cn: String,
     pub comment: u32,
     pub collects: u32,
-    pub info: Option<MonoInfo>,
     pub role_name: String,
     pub jobs: Vec<String>,
 }
