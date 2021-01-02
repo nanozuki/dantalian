@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<episodedetails>
+  <plot>病状が悪化している観鈴に、晴子は翌日の夏祭りの話をし｢明日は2人で最高に楽しい日にしよう｣と約束するのだが・・・。</plot>
+  <outline />
+  <lockdata>false</lockdata>
+  <dateadded>2020-11-14 09:04:30</dateadded>
+  <title>そら</title>
+  <director>Tatsuya Ishihara</director>
+  <writer>Fumihiko Shimo</writer>
+  <credits>Fumihiko Shimo</credits>
+  <rating>10</rating>
+  <year>2005</year>
+  <imdbid>tt0947865</imdbid>
+  <tvdbid>305159</tvdbid>
+  <runtime>24</runtime>
+  <art>
+    <poster>/data/アニメ/AIR/S01E12-thumb.jpg</poster>
+  </art>
+  <isuserfavorite>false</isuserfavorite>
+  <playcount>0</playcount>
+  <watched>false</watched>
+  <resume>
+    <position>0</position>
+    <total>1450.69</total>
+  </resume>
+  <episode>12</episode>
+  <season>1</season>
+  <aired>2005-03-24</aired>
+  <fileinfo>
+    <streamdetails>
+      <video>
+        <codec>xvid</codec>
+        <micodec>xvid</micodec>
+        <bitrate>1892806</bitrate>
+        <width>848</width>
+        <height>480</height>
+        <aspect>16:9</aspect>
+        <aspectratio>16:9</aspectratio>
+        <framerate>23.97</framerate>
+        <scantype>progressive</scantype>
+        <default>True</default>
+        <forced>False</forced>
+        <duration>24</duration>
+        <durationinseconds>1450</durationinseconds>
+      </video>
+      <audio>
+        <codec>mp3</codec>
+        <micodec>mp3</micodec>
+        <bitrate>128000</bitrate>
+        <scantype>progressive</scantype>
+        <channels>2</channels>
+        <samplingrate>48000</samplingrate>
+        <default>True</default>
+        <forced>False</forced>
+      </audio>
+      <subtitle>
+        <codec>ass</codec>
+        <micodec>ass</micodec>
+        <language>chi</language>
+        <scantype>progressive</scantype>
+        <default>True</default>
+        <forced>False</forced>
+      </subtitle>
+      <subtitle>
+        <codec>ass</codec>
+        <micodec>ass</micodec>
+        <language>chi</language>
+        <scantype>progressive</scantype>
+        <default>False</default>
+        <forced>False</forced>
+      </subtitle>
+      <subtitle>
+        <codec>ass</codec>
+        <micodec>ass</micodec>
+        <language>jpn</language>
+        <scantype>progressive</scantype>
+        <default>False</default>
+        <forced>False</forced>
+      </subtitle>
+    </streamdetails>
+  </fileinfo>
+</episodedetails>

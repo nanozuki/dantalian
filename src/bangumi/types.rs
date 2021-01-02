@@ -47,7 +47,7 @@ pub struct SubjectRatingCount {
 #[derive(Deserialize, Debug)]
 pub struct SubjectRating {
     pub total: u32,
-    pub score: f32,
+    pub score: f64,
     pub count: SubjectRatingCount,
 }
 
@@ -75,25 +75,6 @@ pub struct SubjectBase {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct SubjectSmall {
-    pub id: u32,
-    pub url: String,
-    #[serde(rename = "type")]
-    pub subject_type: SubjectType,
-    pub name: String,
-    pub name_cn: String,
-    pub summary: String,
-    pub air_date: String,
-    pub air_weekday: u8,
-    pub images: SubjectImage,
-    pub eps: u32,
-    pub eps_count: u32,
-    pub rating: SubjectRating,
-    pub rank: u32,
-    pub collection: SubjectCollection,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct SubjectMedium {
     pub id: u32,
     pub url: String,
@@ -111,21 +92,20 @@ pub struct SubjectMedium {
     pub rank: u32,
     pub collection: SubjectCollection,
     pub crt: Vec<Character>,
-    pub staff: Vec<MonoBase>,
+    pub staff: Vec<Staff>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Character {
-    id: u32,
-    url: String,
-    name: String,
-    images: CharacterImage,
-    name_cn: String,
-    comment: u32,
-    collects: u32,
-    info: MonoInfo,
-    actors: Vec<Actor>,
-    role_name: String, // example: 主角
+    pub id: u32,
+    pub url: String,
+    pub name: String,
+    pub images: CharacterImage,
+    pub name_cn: String,
+    pub comment: u32,
+    pub collects: u32,
+    pub actors: Vec<Actor>,
+    pub role_name: String, // example: 主角
 }
 
 #[derive(Deserialize, Debug)]
@@ -137,40 +117,27 @@ pub struct CharacterImage {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct MonoInfo {
-    name_cn: String,
-    birth: Option<String>,
-    height: Option<String>,
-    gender: Option<String>,
-    alias: MonoInfoAlias,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct MonoInfoAlias {
-    jp: Option<String>,
-    kana: Option<String>,
-    nick: Option<String>,
-    romaji: Option<String>,
-    zh: Option<String>,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct Actor {
-    id: u32,
-    url: String,
-    name: String,
-    images: Option<CharacterImage>,
+    pub id: u32,
+    pub url: String,
+    pub name: String,
+    pub images: Option<CharacterImage>,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct MonoBase {
-    id: u32,
-    url: String,
-    name: String,
-    images: Option<CharacterImage>,
+pub struct Staff {
+    pub id: u32,
+    pub url: String,
+    pub name: String,
+    pub images: Option<CharacterImage>,
+    pub name_cn: String,
+    pub comment: u32,
+    pub collects: u32,
+    pub role_name: String,
+    pub jobs: Vec<String>,
 }
 
-#[derive(Deserialize_repr, Debug)]
+#[derive(Deserialize_repr, PartialEq, Debug)]
 #[repr(u32)]
 pub enum EpisodeType {
     Honpen = 0,
@@ -182,7 +149,7 @@ pub enum EpisodeType {
     Other = 6,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, PartialEq, Debug)]
 pub enum EpisodeStatus {
     Air,
     Today,
