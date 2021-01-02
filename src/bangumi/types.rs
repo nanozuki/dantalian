@@ -75,25 +75,6 @@ pub struct SubjectBase {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct SubjectSmall {
-    pub id: u32,
-    pub url: String,
-    #[serde(rename = "type")]
-    pub subject_type: SubjectType,
-    pub name: String,
-    pub name_cn: String,
-    pub summary: String,
-    pub air_date: String,
-    pub air_weekday: u8,
-    pub images: SubjectImage,
-    pub eps: u32,
-    pub eps_count: u32,
-    pub rating: SubjectRating,
-    pub rank: u32,
-    pub collection: SubjectCollection,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct SubjectMedium {
     pub id: u32,
     pub url: String,
@@ -142,17 +123,6 @@ pub struct MonoInfo {
     pub birth: Option<String>,
     pub height: Option<String>,
     pub gender: Option<String>,
-    #[serde(skip)]
-    pub alias: MonoInfoAlias,
-}
-
-#[derive(Deserialize, Debug, Default)]
-pub struct MonoInfoAlias {
-    pub jp: Option<String>,
-    pub kana: Option<String>,
-    pub nick: Option<String>,
-    pub romaji: Option<String>,
-    pub zh: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]

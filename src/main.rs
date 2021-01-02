@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
             }
             BgmSubCmd::GetEp(get_opts) => {
                 println!("get subject {}", get_opts.id);
-                let _ = bangumi::get_subject_episode(get_opts.id).await?;
+                let _ = bangumi::get_subject_episodes(get_opts.id).await?;
                 Ok(())
             }
         },
