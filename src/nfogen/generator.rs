@@ -22,7 +22,7 @@ impl<'a> Generator<'a> {
             .tt
             .render("tvshow", show)
             .with_context(|| "render tvshow")?;
-        println!("generated tvshow nfo file:\n{}", &rendered);
+        log::info!("generated tvshow nfo file:\n{}", &rendered);
         Ok(rendered)
     }
 
@@ -31,7 +31,7 @@ impl<'a> Generator<'a> {
             .tt
             .render("episode", episode)
             .with_context(|| "render episode")?;
-        println!("generated episode nfo file:\n{}", &rendered);
+        log::info!("generated episode nfo file:\n{}", &rendered);
         Ok(rendered)
     }
 }

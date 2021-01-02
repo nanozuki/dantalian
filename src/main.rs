@@ -8,11 +8,25 @@ use dantalian::dantalian::Dantalian;
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCmd,
+    #[clap(short, long)]
+    debug: bool,
+}
+
+fn log_init(debug: bool) {
+    let level = if debug {
+        simplelog::LevelFilter::Info
+    } else {
+        simplelog::LevelFilter::Error
+    };
+    let config = simplelog::Config::default();
+    let mode = simplelog::TerminalMode::Mixed;
+    simplelog::TermLogger::init(level, config, mode).expect("log init failed.");
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
+    log_init(opts.debug);
     match opts.subcmd {
         SubCmd::Bgm(sub_opts) => match sub_opts.subcmd {
             BgmSubCmd::Search(search_opts) => {
@@ -27,7 +41,7 @@ async fn main() -> Result<()> {
             }
             BgmSubCmd::GetEp(get_opts) => {
                 println!("get subject {}", get_opts.id);
-                let _ = bangumi::get_subject_episode(get_opts.id).await?;
+                let _ = bangumi::get_subject_episodes(get_opts.id).await?;
                 Ok(())
             }
         },
