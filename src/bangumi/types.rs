@@ -138,14 +138,15 @@ pub struct CharacterImage {
 
 #[derive(Deserialize, Debug)]
 pub struct MonoInfo {
-    pub name_cn: String,
+    pub name_cn: Option<String>,
     pub birth: Option<String>,
     pub height: Option<String>,
     pub gender: Option<String>,
+    #[serde(skip)]
     pub alias: MonoInfoAlias,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct MonoInfoAlias {
     pub jp: Option<String>,
     pub kana: Option<String>,
