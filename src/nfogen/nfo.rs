@@ -1,6 +1,8 @@
 use serde::Serialize;
 use std::rc::Rc;
 
+pub const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
+
 // TVShow file is for overall show informaion.
 // TVShow file name must actully be tvshow.nfo.
 // This file must be tv show's folder's root.

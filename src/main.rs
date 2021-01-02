@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
         SubCmd::Bgm(sub_opts) => match sub_opts.subcmd {
             BgmSubCmd::Search(search_opts) => {
                 println!("search anime {}", search_opts.keyword);
-                let _ = bangumi::search_anime(search_opts.keyword).await?;
+                let _ = bangumi::search_anime(&search_opts.keyword).await?;
                 Ok(())
             }
             BgmSubCmd::Get(get_opts) => {
@@ -33,7 +33,9 @@ async fn main() -> Result<()> {
         },
         SubCmd::Gen(gen_opts) => {
             for root in gen_opts.roots {
-                println!("root: {}", root)
+                println!("root: {}", &root);
+                let d = Dantalian::new();
+                d.generate_path(&root).await?;
             }
             Ok(())
         }

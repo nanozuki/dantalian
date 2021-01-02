@@ -2,13 +2,14 @@ use super::types::{Episode, SubjectBase, SubjectMedium};
 use anyhow::{Context, Result};
 use hyper::{Client, Uri};
 use hyper_tls::HttpsConnector;
-use percent_encoding::{utf8_percent_encode, CONTROLS};
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
 
-pub async fn search_anime(keyword: String) -> Result<Vec<SubjectBase>> {
+pub async fn search_anime(keyword: &String) -> Result<Vec<SubjectBase>> {
     println!("search_subject: {}", keyword);
-    let encoded_keyword = utf8_percent_encode(&keyword, &CONTROLS);
+    let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
     let path = format!("/search/subject/{}?type=2", encoded_keyword);
+    println!("request url {}", path);
     let res_obj: SearchResponse = request(&path).await?;
     println!("obj: {:?}", &res_obj);
     Ok(res_obj.list)
