@@ -78,7 +78,7 @@ async fn request<T: DeserializeOwned>(path: &str) -> Result<T> {
         .await
         .with_context(|| "read body")?;
     let res_obj: T = serde_json::from_slice(&buf).with_context(|| {
-        let body = String::from_utf8(buf.to_vec()).unwrap_or("not utf8".to_string());
+        let body = String::from_utf8(buf.to_vec()).unwrap_or_else(|_| "not utf8".to_string());
         format!("get body: {}", body)
     })?;
     Ok(res_obj)
