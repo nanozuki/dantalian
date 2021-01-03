@@ -61,7 +61,7 @@ Put all episodes of one anime subject into one folder and put the folder in your
 root"). The name of the folder should follow this format below:
 
 ```
-Anime Name [自定义tag][tag1][tag2]
+Anime Name [custom tag][tag1][tag2]
 ```
 
 It's better to check the anime name first. You can check anime name by bangumi. (or use `dantalian bgm search <keyword>`
