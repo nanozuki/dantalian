@@ -9,22 +9,9 @@ use std::path::Path;
 use std::rc::Rc;
 use walkdir::{DirEntry, WalkDir};
 
-// AnimeData store data for generator nfo files.
-#[derive(Debug)]
-pub struct AnimeData {
-    pub tvshow: TVShow,
-    pub episodes: Vec<Episode>,
-}
-
-// AnimeNFO for the content of anime nfo files.
-#[derive(Debug)]
-pub struct AnimeNFO {
-    pub tvshow: String,
-    pub episodes: Vec<String>,
-}
-
 pub struct Dantalian<'a> {
     nfo_generator: Generator<'a>,
+    anime_name_re: Regex,
 }
 
 impl<'a> Dantalian<'a> {
@@ -32,6 +19,7 @@ impl<'a> Dantalian<'a> {
     pub fn new() -> Dantalian<'a> {
         Dantalian {
             nfo_generator: Generator::new(),
+            anime_name_re: Regex::new(r"^(?P<name>.+?)(?P<tags> (\[[^\s]+\])+)?$").unwrap(),
         }
     }
 
@@ -48,7 +36,7 @@ impl<'a> Dantalian<'a> {
         let bgm_anime = get_anime_data(subject_id)
             .await
             .with_context(|| "get_anime_data")?;
-        let data = parse_bgm_anime(bgm_anime);
+        let data = AnimeData::from(bgm_anime);
         Ok(data)
     }
 
@@ -69,18 +57,20 @@ impl<'a> Dantalian<'a> {
     ///         ├── 进击的巨人 最终季 61.mp4
     ///         ├── 进击的巨人 最终季 62.mp4
     ///         └── 进击的巨人 最终季 63.mp4
-
     pub async fn generate_path(&self, root: &str, force: &HashSet<String>) -> Result<()> {
         for e in WalkDir::new(root).min_depth(1).max_depth(1) {
             let entry = e?;
             if entry.file_type().is_dir() {
                 println!("{}", entry.path().display());
                 let path = entry.path().to_str();
-                let filename = entry.file_name().to_str();
-                match (path, filename) {
-                    (Some(p), Some(f)) => {
-                        println!("Try Anime Name: '{}'", f);
-                        self.generate_anime(p, f, force.contains(f)).await?;
+                let anime_name = entry
+                    .file_name()
+                    .to_str()
+                    .and_then(|f| self.cap_anime_name(f));
+                match (path, anime_name) {
+                    (Some(p), Some(a)) => {
+                        println!("Try Anime Name: '{}'", a);
+                        self.generate_anime(p, &a, force.contains(&a)).await?;
                     }
                     _ => {
                         println!("Can't parse this path, skip");
@@ -89,6 +79,13 @@ impl<'a> Dantalian<'a> {
             }
         }
         Ok(())
+    }
+
+    pub fn cap_anime_name(&self, dir_name: &str) -> Option<String> {
+        self.anime_name_re
+            .captures(dir_name)
+            .and_then(|cap| cap.name("name"))
+            .map(|mat| String::from(mat.as_str()))
     }
 
     async fn generate_anime(&self, path: &str, anime_name: &str, force: bool) -> Result<()> {
@@ -101,7 +98,7 @@ impl<'a> Dantalian<'a> {
             return Ok(());
         }
         let subject_id = subjects[0].id;
-        let anime_data = parse_bgm_anime(get_anime_data(subject_id).await?);
+        let anime_data = AnimeData::from(get_anime_data(subject_id).await?);
         if job.gen_tvshow {
             print!("Prepare to gen tvshow.nfo for '{}' ... ", &anime_name);
             let file_content = self.nfo_generator.gen_tvshow_nfo(&anime_data.tvshow)?;
@@ -132,93 +129,109 @@ impl<'a> Dantalian<'a> {
     }
 }
 
-fn parse_bgm_anime(bgm_data: BgmAnime) -> AnimeData {
-    let mut data = AnimeData {
-        episodes: Vec::new(),
-        tvshow: TVShow {
-            uid: bgm_data.subject.id,
-            title: bgm_data.subject.name_cn,
-            original_title: bgm_data.subject.name,
-            rating_value: bgm_data.subject.rating.score,
-            rating_votes: bgm_data.subject.rating.total,
-            has_sp: false,
-            eps_count: bgm_data.subject.eps_count,
-            plot: bgm_data.subject.summary,
-            poster: bgm_data.subject.images.large,
-            genres: vec![],
-            tags: vec![],
-            premiered: bgm_data.subject.air_date,
-            status: None,
-            studio: None,
-            actors: Rc::from(Vec::new()),
-        },
-    };
+// AnimeData store data for generator nfo files.
+#[derive(Debug)]
+pub struct AnimeData {
+    pub tvshow: TVShow,
+    pub episodes: Vec<Episode>,
+}
 
-    let mut actors: Vec<Actor> = Vec::new();
-    for crt in bgm_data.subject.crt.iter() {
-        match &crt.actors {
-            Some(crt_actors) => {
-                for a in crt_actors.iter() {
+impl From<BgmAnime> for AnimeData {
+    fn from(bgm_data: BgmAnime) -> Self {
+        let mut data = AnimeData {
+            episodes: Vec::new(),
+            tvshow: TVShow {
+                uid: bgm_data.subject.id,
+                title: bgm_data.subject.name_cn,
+                original_title: bgm_data.subject.name,
+                rating_value: bgm_data.subject.rating.score,
+                rating_votes: bgm_data.subject.rating.total,
+                has_sp: false,
+                eps_count: bgm_data.subject.eps_count,
+                plot: bgm_data.subject.summary,
+                poster: bgm_data.subject.images.large,
+                genres: vec![],
+                tags: vec![],
+                premiered: bgm_data.subject.air_date,
+                status: None,
+                studio: None,
+                actors: Rc::from(Vec::new()),
+            },
+        };
+
+        let mut actors: Vec<Actor> = Vec::new();
+        for crt in bgm_data.subject.crt.iter() {
+            match &crt.actors {
+                Some(crt_actors) => {
+                    for a in crt_actors.iter() {
+                        actors.push(Actor {
+                            name: String::from(&crt.name_cn),
+                            role: String::from(&a.name),
+                            order: actors.len() as u32,
+                            thumb: String::from(&crt.images.large),
+                        });
+                    }
+                }
+                None => {
                     actors.push(Actor {
                         name: String::from(&crt.name_cn),
-                        role: String::from(&a.name),
+                        role: String::from("N/A"),
                         order: actors.len() as u32,
                         thumb: String::from(&crt.images.large),
                     });
                 }
             }
-            None => {
-                actors.push(Actor {
-                    name: String::from(&crt.name_cn),
-                    role: String::from("N/A"),
-                    order: actors.len() as u32,
-                    thumb: String::from(&crt.images.large),
-                });
-            }
         }
-    }
-    data.tvshow.actors = Rc::from(actors);
+        data.tvshow.actors = Rc::from(actors);
 
-    let mut directors: Vec<String> = Vec::new();
-    let mut credits: Vec<String> = Vec::new();
-    for staff in bgm_data.subject.staff.iter() {
-        for job in staff.jobs.iter() {
-            if job == "导演" {
-                directors.push(String::from(&staff.name));
-            }
-            if job == "脚本" {
-                credits.push(String::from(&staff.name));
+        let mut directors: Vec<String> = Vec::new();
+        let mut credits: Vec<String> = Vec::new();
+        for staff in bgm_data.subject.staff.iter() {
+            for job in staff.jobs.iter() {
+                if job == "导演" {
+                    directors.push(String::from(&staff.name));
+                }
+                if job == "脚本" {
+                    credits.push(String::from(&staff.name));
+                }
             }
         }
-    }
-    let rc_directors = Rc::from(directors);
-    let rc_credits = Rc::from(credits);
+        let rc_directors = Rc::from(directors);
+        let rc_credits = Rc::from(credits);
 
-    for be in bgm_data.episodes {
-        if be.status != EpisodeStatus::NA {
-            let is_sp = be.episode_type == EpisodeType::Sp;
-            data.tvshow.has_sp = data.tvshow.has_sp || is_sp;
-            data.episodes.push(Episode {
-                uid: be.id,
-                title: be.name_cn,
-                original_title: be.name,
-                show_title: String::from(&data.tvshow.title),
-                rating_value: None,
-                rating_votes: None,
-                ep_index: format!("{}", be.sort),
-                is_sp,
-                plot: be.desc,
-                directors: Rc::clone(&rc_directors),
-                credits: Rc::clone(&rc_credits),
-                premiered: String::from(&data.tvshow.premiered),
-                status: Some(format!("{:?}", be.status)),
-                aired: Some(be.airdate),
-                studio: None,
-                actors: Rc::clone(&data.tvshow.actors),
-            })
+        for be in bgm_data.episodes {
+            if be.status != EpisodeStatus::NA {
+                let is_sp = be.episode_type == EpisodeType::Sp;
+                data.tvshow.has_sp = data.tvshow.has_sp || is_sp;
+                data.episodes.push(Episode {
+                    uid: be.id,
+                    title: be.name_cn,
+                    original_title: be.name,
+                    show_title: String::from(&data.tvshow.title),
+                    rating_value: None,
+                    rating_votes: None,
+                    ep_index: format!("{}", be.sort),
+                    is_sp,
+                    plot: be.desc,
+                    directors: Rc::clone(&rc_directors),
+                    credits: Rc::clone(&rc_credits),
+                    premiered: String::from(&data.tvshow.premiered),
+                    status: Some(format!("{:?}", be.status)),
+                    aired: Some(be.airdate),
+                    studio: None,
+                    actors: Rc::clone(&data.tvshow.actors),
+                })
+            }
         }
+        data
     }
-    data
+}
+
+// AnimeNFO for the content of anime nfo files.
+#[derive(Debug)]
+pub struct AnimeNFO {
+    pub tvshow: String,
+    pub episodes: Vec<String>,
 }
 
 enum FileType {
