@@ -23,7 +23,7 @@ In general, this thing has the following peculiarity:
 (Dantalian will use the whole series info as an alternative).
 * Lack of a poster of a single episode. The media center software will capture it.
 
-## file structure
+## File structure
 
 ```
 <media_root>/
