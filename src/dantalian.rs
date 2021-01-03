@@ -55,16 +55,21 @@ impl<'a> Dantalian<'a> {
     /// generate nfo files for all tv anime media files.
     /// the files structure should follow this:
     /// media_root/
-    /// ├── ひぐらしのなく頃に 業
-    /// │   ├── ひぐらしのなく頃に 業 01.mp4
-    /// │   ├── ひぐらしのなく頃に 業 02.mp4
-    /// │   ├── ひぐらしのなく頃に 業 03.mp4
-    /// │   └── ひぐらしのなく頃に 業 04.mp4
-    /// └── 进击的巨人 最终季
-    ///     ├── 进击的巨人 最终季 60.mp4
-    ///     ├── 进击的巨人 最终季 61.mp4
-    ///     ├── 进击的巨人 最终季 62.mp4
-    ///     └── 进击的巨人 最终季 63.mp4
+    ///     ├── ひぐらしのなく頃に 業
+    ///     │   ├── ひぐらしのなく頃に 業 01.mp4
+    ///     │   ├── ひぐらしのなく頃に 業 02.mp4
+    ///     │   ├── ひぐらしのなく頃に 業 03.mp4
+    ///     │   └── ひぐらしのなく頃に 業 04.mp4
+    ///     ├── 化物語
+    ///     │   ├── 化物語 01.mp4
+    ///     │   ├── 化物語 02.mp4
+    ///     │   └── 化物語 SP5_5.mp4
+    ///     └── 进击的巨人 最终季
+    ///         ├── 进击的巨人 最终季 60.mp4
+    ///         ├── 进击的巨人 最终季 61.mp4
+    ///         ├── 进击的巨人 最终季 62.mp4
+    ///         └── 进击的巨人 最终季 63.mp4
+
     pub async fn generate_path(&self, root: &str) -> Result<()> {
         for e in WalkDir::new(root).max_depth(1) {
             let entry = e?;
@@ -88,7 +93,7 @@ impl<'a> Dantalian<'a> {
 
     async fn generate_anime(&self, path: &str, anime_name: &str) -> Result<()> {
         let job = collect_gen_jobs(path, anime_name)?;
-        if (!job.gen_tvshow) || job.gen_episodes.is_empty() {
+        if job.is_empty() {
             return Ok(());
         }
         let subjects = search_anime(&anime_name.to_string()).await?;
@@ -106,8 +111,15 @@ impl<'a> Dantalian<'a> {
             println!("Done!");
         }
         for episode in anime_data.episodes {
-            if let Some(ep) = job.gen_episodes.get(&episode.ep_index) {
-                let file_name = format!("{} {}.nfo", &anime_name, ep);
+            let job_map = match episode.is_sp {
+                false => &job.gen_episodes,
+                true => &job.gen_sps,
+            };
+            if let Some(ep_file) = job_map.get(&episode.ep_index) {
+                let file_name = match episode.is_sp {
+                    false => format!("{} {}.nfo", &anime_name, ep_file),
+                    true => format!("{} SP{}.nfo", &anime_name, ep_file),
+                };
                 print!("Prepare to gen {} ... ", &file_name);
                 let file_content = self.nfo_generator.gen_episode_nfo(&episode)?;
                 let file_path = Path::new(path).join(file_name);
@@ -144,13 +156,25 @@ fn parse_bgm_anime(bgm_data: BgmAnime) -> AnimeData {
 
     let mut actors: Vec<Actor> = Vec::new();
     for crt in bgm_data.subject.crt.iter() {
-        for a in crt.actors.iter() {
-            actors.push(Actor {
-                name: String::from(&a.name),
-                role: String::from(&crt.name_cn),
-                order: actors.len() as u32,
-                thumb: String::from(&crt.images.large),
-            });
+        match &crt.actors {
+            Some(crt_actors) => {
+                for a in crt_actors.iter() {
+                    actors.push(Actor {
+                        name: String::from(&crt.name_cn),
+                        role: String::from(&a.name),
+                        order: actors.len() as u32,
+                        thumb: String::from(&crt.images.large),
+                    });
+                }
+            }
+            None => {
+                actors.push(Actor {
+                    name: String::from(&crt.name_cn),
+                    role: String::from("N/A"),
+                    order: actors.len() as u32,
+                    thumb: String::from(&crt.images.large),
+                });
+            }
         }
     }
     data.tvshow.actors = Rc::from(actors);
@@ -181,7 +205,7 @@ fn parse_bgm_anime(bgm_data: BgmAnime) -> AnimeData {
                 show_title: String::from(&data.tvshow.title),
                 rating_value: None,
                 rating_votes: None,
-                ep_index: be.sort,
+                ep_index: format!("{}", be.sort),
                 is_sp,
                 plot: be.desc,
                 directors: Rc::clone(&rc_directors),
@@ -200,22 +224,34 @@ fn parse_bgm_anime(bgm_data: BgmAnime) -> AnimeData {
 enum FileType {
     Unknown,
     TVShowNFO,
-    EpNFO(u32),
-    EpMedia(u32, String),
+    EpNFO(String),
+    SpNFO(String),
+    EpMedia(String, String), // episode nfo : episode in filename
+    SpMedia(String, String), // episode nfo : episode in filename
 }
 
 struct GenerateJob {
     gen_tvshow: bool,
-    gen_episodes: HashMap<u32, String>,
+    gen_episodes: HashMap<String, String>,
+    gen_sps: HashMap<String, String>,
+}
+
+impl GenerateJob {
+    fn is_empty(&self) -> bool {
+        (!self.gen_tvshow) && (self.gen_episodes.is_empty()) && (self.gen_sps.is_empty())
+    }
 }
 
 fn collect_gen_jobs(path: &str, anime_name: &str) -> Result<GenerateJob> {
     let mut job = GenerateJob {
         gen_tvshow: true,
         gen_episodes: HashMap::new(),
+        gen_sps: HashMap::new(),
     };
-    let mut has_episode_nfo: HashSet<u32> = HashSet::new();
-    let mut has_episode_media: HashMap<u32, String> = HashMap::new();
+    let mut has_episode_nfo: HashSet<String> = HashSet::new();
+    let mut has_episode_media: HashMap<String, String> = HashMap::new();
+    let mut has_sp_nfo: HashSet<String> = HashSet::new();
+    let mut has_sp_media: HashMap<String, String> = HashMap::new();
     for file in WalkDir::new(path).max_depth(1) {
         let f = file?;
         match check_file(&f, anime_name) {
@@ -228,12 +264,23 @@ fn collect_gen_jobs(path: &str, anime_name: &str) -> Result<GenerateJob> {
             FileType::EpMedia(epi, ep) => {
                 has_episode_media.insert(epi, ep);
             }
+            FileType::SpNFO(epi) => {
+                has_sp_nfo.insert(epi);
+            }
+            FileType::SpMedia(epi, ep) => {
+                has_sp_media.insert(epi, ep);
+            }
             _ => {}
         }
     }
-    for (epi, ep) in has_episode_media {
-        if !has_episode_nfo.contains(&epi) {
-            job.gen_episodes.insert(epi, ep);
+    for (ep_index, ep_file) in has_episode_media {
+        if !has_episode_nfo.contains(&ep_index) {
+            job.gen_episodes.insert(ep_index, ep_file);
+        }
+    }
+    for (ep_index, ep_file) in has_sp_media {
+        if !has_sp_nfo.contains(&ep_index) {
+            job.gen_sps.insert(ep_index, ep_file);
         }
     }
     Ok(job)
@@ -243,7 +290,7 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
     if !file.file_type().is_file() {
         return FileType::Unknown;
     }
-    let file_name = match file.file_name().to_str().map(String::from) {
+    let file_name = match file.file_name().to_str() {
         Some(file_name) => file_name,
         None => {
             return FileType::Unknown;
@@ -253,24 +300,29 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
         return FileType::TVShowNFO;
     }
     // shouldn't be error
-    let episode_re = Regex::new(format!(r"^{} (\d+).", anime_name).as_str()).unwrap();
-    let ep = match episode_re
-        .captures(&file_name)
-        .and_then(|captures| captures.get(1))
-        .map(|mat| mat.as_str())
-    {
+    let episode_re =
+        Regex::new(format!(r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.", anime_name).as_str())
+            .unwrap();
+    let cap = match episode_re.captures(&file_name) {
+        Some(cap) => cap,
+        None => {
+            return FileType::Unknown;
+        }
+    };
+    let is_sp = cap.name("sp").map_or(false, |mat| mat.as_str() == "SP");
+    let ep_file = match cap.name("ep").map(|mat| mat.as_str()) {
         Some(ep) => ep,
         None => {
             return FileType::Unknown;
         }
     };
-    let ep_index = match ep.parse::<u32>() {
-        Ok(ep_index) => ep_index,
-        Err(_) => return FileType::Unknown,
-    };
-    if file_name.ends_with(".nfo") {
-        FileType::EpNFO(ep_index)
-    } else {
-        FileType::EpMedia(ep_index, ep.to_string())
+    let ep_index = ep_file.replace("_", ".");
+    let ep_index = ep_index.trim_start_matches('0');
+    let is_nfo = file_name.ends_with(".nfo");
+    match (is_nfo, is_sp) {
+        (true, true) => FileType::SpNFO(String::from(ep_index)),
+        (true, false) => FileType::EpNFO(String::from(ep_index)),
+        (false, true) => FileType::SpMedia(String::from(ep_index), String::from(ep_file)),
+        (false, false) => FileType::EpMedia(String::from(ep_index), String::from(ep_file)),
     }
 }
