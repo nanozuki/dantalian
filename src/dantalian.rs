@@ -70,8 +70,8 @@ impl<'a> Dantalian<'a> {
     ///         ├── 进击的巨人 最终季 62.mp4
     ///         └── 进击的巨人 最终季 63.mp4
 
-    pub async fn generate_path(&self, root: &str) -> Result<()> {
-        for e in WalkDir::new(root).max_depth(1) {
+    pub async fn generate_path(&self, root: &str, force: &HashSet<String>) -> Result<()> {
+        for e in WalkDir::new(root).min_depth(1).max_depth(1) {
             let entry = e?;
             if entry.file_type().is_dir() {
                 println!("{}", entry.path().display());
@@ -80,7 +80,7 @@ impl<'a> Dantalian<'a> {
                 match (path, filename) {
                     (Some(p), Some(f)) => {
                         println!("Try Anime Name: '{}'", f);
-                        self.generate_anime(p, f).await?;
+                        self.generate_anime(p, f, force.contains(f)).await?;
                     }
                     _ => {
                         println!("Can't parse this path, skip");
@@ -91,8 +91,8 @@ impl<'a> Dantalian<'a> {
         Ok(())
     }
 
-    async fn generate_anime(&self, path: &str, anime_name: &str) -> Result<()> {
-        let job = collect_gen_jobs(path, anime_name)?;
+    async fn generate_anime(&self, path: &str, anime_name: &str, force: bool) -> Result<()> {
+        let job = collect_gen_jobs(path, anime_name, force)?;
         if job.is_empty() {
             return Ok(());
         }
@@ -242,7 +242,7 @@ impl GenerateJob {
     }
 }
 
-fn collect_gen_jobs(path: &str, anime_name: &str) -> Result<GenerateJob> {
+fn collect_gen_jobs(path: &str, anime_name: &str, force: bool) -> Result<GenerateJob> {
     let mut job = GenerateJob {
         gen_tvshow: true,
         gen_episodes: HashMap::new(),
@@ -252,11 +252,13 @@ fn collect_gen_jobs(path: &str, anime_name: &str) -> Result<GenerateJob> {
     let mut has_episode_media: HashMap<String, String> = HashMap::new();
     let mut has_sp_nfo: HashSet<String> = HashSet::new();
     let mut has_sp_media: HashMap<String, String> = HashMap::new();
-    for file in WalkDir::new(path).max_depth(1) {
+    for file in WalkDir::new(path).min_depth(1).max_depth(1) {
         let f = file?;
         match check_file(&f, anime_name) {
             FileType::TVShowNFO => {
-                job.gen_tvshow = false;
+                if !force {
+                    job.gen_tvshow = false;
+                }
             }
             FileType::EpNFO(epi) => {
                 has_episode_nfo.insert(epi);
@@ -274,12 +276,12 @@ fn collect_gen_jobs(path: &str, anime_name: &str) -> Result<GenerateJob> {
         }
     }
     for (ep_index, ep_file) in has_episode_media {
-        if !has_episode_nfo.contains(&ep_index) {
+        if (!has_episode_nfo.contains(&ep_index)) || force {
             job.gen_episodes.insert(ep_index, ep_file);
         }
     }
     for (ep_index, ep_file) in has_sp_media {
-        if !has_sp_nfo.contains(&ep_index) {
+        if (!has_sp_nfo.contains(&ep_index)) || force {
             job.gen_sps.insert(ep_index, ep_file);
         }
     }

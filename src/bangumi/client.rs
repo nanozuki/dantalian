@@ -1,13 +1,11 @@
 use super::types::{Episode, SubjectBase, SubjectMedium};
 use anyhow::{Context, Result};
-use hyper::{Client, Uri, Request, Body};
+use hyper::{Client, Uri};
 use hyper_tls::HttpsConnector;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
-use tokio::time::{sleep, Duration};
 
 pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
-    sleep(Duration::from_secs(2)).await;
     println!("search_subject: {}", keyword);
     let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
     let path = format!("/search/subject/{}?type=2", encoded_keyword);
@@ -31,7 +29,6 @@ pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
 }
 
 pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
-    sleep(Duration::from_secs(1)).await;
     println!("get_subject_info: {}", id);
     let path = format!("/subject/{}?responseGroup=medium", id);
     let subject: SubjectMedium = request(&path)
@@ -42,7 +39,6 @@ pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
 }
 
 pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
-    sleep(Duration::from_secs(1)).await;
     println!("get_subject_info: {}", id);
     let path = format!("/subject/{}/ep", id);
     let res: EpisodeResponse = request(&path)
@@ -54,7 +50,8 @@ pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
     Ok(res.eps)
 }
 
-const BASE_URL: &str = "https://api.bgm.tv";
+// mirror of "https://api.bgm.tv" for scripts.
+const BASE_URL: &str = "https://mirror.api.bgm.rin.cat";
 
 #[derive(Deserialize, Debug)]
 struct SearchResponse {
@@ -80,6 +77,9 @@ async fn request<T: DeserializeOwned>(path: &str) -> Result<T> {
     let buf = hyper::body::to_bytes(res)
         .await
         .with_context(|| "read body")?;
-    let res_obj: T = serde_json::from_slice(&buf).with_context(|| "parse body")?;
+    let res_obj: T = serde_json::from_slice(&buf).with_context(|| {
+        let body = String::from_utf8(buf.to_vec()).unwrap_or("not utf8".to_string());
+        format!("get body: {}", body)
+    })?;
     Ok(res_obj)
 }
