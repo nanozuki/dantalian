@@ -25,6 +25,7 @@ pub struct AnimeNFO {
 
 pub struct Dantalian<'a> {
     nfo_generator: Generator<'a>,
+    anime_name_re: Regex,
 }
 
 impl<'a> Dantalian<'a> {
@@ -32,6 +33,7 @@ impl<'a> Dantalian<'a> {
     pub fn new() -> Dantalian<'a> {
         Dantalian {
             nfo_generator: Generator::new(),
+            anime_name_re: Regex::new(r"^(?P<name>.+?)(?P<tags> (\[[^\s]+\])+)?$").unwrap(),
         }
     }
 
@@ -69,18 +71,20 @@ impl<'a> Dantalian<'a> {
     ///         ├── 进击的巨人 最终季 61.mp4
     ///         ├── 进击的巨人 最终季 62.mp4
     ///         └── 进击的巨人 最终季 63.mp4
-
     pub async fn generate_path(&self, root: &str, force: &HashSet<String>) -> Result<()> {
         for e in WalkDir::new(root).min_depth(1).max_depth(1) {
             let entry = e?;
             if entry.file_type().is_dir() {
                 println!("{}", entry.path().display());
                 let path = entry.path().to_str();
-                let filename = entry.file_name().to_str();
-                match (path, filename) {
-                    (Some(p), Some(f)) => {
-                        println!("Try Anime Name: '{}'", f);
-                        self.generate_anime(p, f, force.contains(f)).await?;
+                let anime_name = entry
+                    .file_name()
+                    .to_str()
+                    .and_then(|f| self.cap_anime_name(f));
+                match (path, anime_name) {
+                    (Some(p), Some(a)) => {
+                        println!("Try Anime Name: '{}'", a);
+                        self.generate_anime(p, &a, force.contains(&a)).await?;
                     }
                     _ => {
                         println!("Can't parse this path, skip");
@@ -89,6 +93,13 @@ impl<'a> Dantalian<'a> {
             }
         }
         Ok(())
+    }
+
+    pub fn cap_anime_name(&self, dir_name: &str) -> Option<String> {
+        self.anime_name_re
+            .captures(dir_name)
+            .and_then(|cap| cap.name("name"))
+            .map(|mat| String::from(mat.as_str()))
     }
 
     async fn generate_anime(&self, path: &str, anime_name: &str, force: bool) -> Result<()> {
