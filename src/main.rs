@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use dantalian::bangumi;
 use dantalian::dantalian::Dantalian;
+use std::collections::HashSet;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
@@ -17,7 +18,7 @@ async fn main() -> Result<()> {
         SubCmd::Bgm(sub_opts) => match sub_opts.subcmd {
             BgmSubCmd::Search(search_opts) => {
                 println!("search anime {}", search_opts.keyword);
-                let _ = bangumi::search_anime(search_opts.keyword).await?;
+                let _ = bangumi::search_anime(&search_opts.keyword).await?;
                 Ok(())
             }
             BgmSubCmd::Get(get_opts) => {
@@ -32,8 +33,14 @@ async fn main() -> Result<()> {
             }
         },
         SubCmd::Gen(gen_opts) => {
-            for root in gen_opts.roots {
-                println!("root: {}", root)
+            let mut force: HashSet<String> = HashSet::new();
+            for f in gen_opts.force {
+                force.insert(f);
+            }
+            for root in gen_opts.root {
+                println!("root: {}, rescan: {:#?}", &root, &force);
+                let d = Dantalian::new();
+                d.generate_path(&root, &force).await?;
             }
             Ok(())
         }
@@ -64,8 +71,10 @@ enum SubCmd {
 #[derive(Clap)]
 #[clap(about = "gen nfo files for spci")]
 struct GenCmd {
-    #[clap(long, required = true)]
-    roots: Vec<String>,
+    #[clap(long, about = "path root of anime media files", required = true)]
+    root: Vec<String>,
+    #[clap(long, about = "anime names which you want to rescan", required = false)]
+    force: Vec<String>,
 }
 
 #[derive(Clap)]
@@ -73,12 +82,6 @@ struct GenCmd {
 struct CheckCmd {
     #[clap(short, long, required = true)]
     subject: u32,
-    /*
-    #[clap(long, required = false)]
-    ep: u32,
-    #[clap(long)]
-    all: bool,
-    */
 }
 
 #[derive(Clap)]

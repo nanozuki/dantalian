@@ -104,7 +104,7 @@ pub struct Character {
     pub name_cn: String,
     pub comment: u32,
     pub collects: u32,
-    pub actors: Vec<Actor>,
+    pub actors: Option<Vec<Actor>>,
     pub role_name: String, // example: 主角
 }
 
@@ -162,7 +162,7 @@ pub struct Episode {
     pub url: String,
     #[serde(rename = "type")]
     pub episode_type: EpisodeType,
-    pub sort: u32,
+    pub sort: f64,
     pub name: String,
     pub name_cn: String,
     pub duration: String,

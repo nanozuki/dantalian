@@ -1,6 +1,8 @@
 use serde::Serialize;
 use std::rc::Rc;
 
+pub const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
+
 // TVShow file is for overall show informaion.
 // TVShow file name must actully be tvshow.nfo.
 // This file must be tv show's folder's root.
@@ -70,7 +72,7 @@ pub struct Episode {
     pub show_title: String,
     pub rating_value: Option<f64>,
     pub rating_votes: Option<u32>,
-    pub ep_index: u32,
+    pub ep_index: String,
     pub is_sp: bool,
     pub plot: String,
     pub directors: Rc<[String]>,

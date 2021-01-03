@@ -13,3 +13,6 @@
 
 # OS
 .DS_Store
+
+# run example
+examples/media_root/**/*.nfo
