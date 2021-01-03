@@ -5,7 +5,7 @@ use hyper_tls::HttpsConnector;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
 
-pub async fn search_anime(keyword: &String) -> Result<Vec<SubjectBase>> {
+pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
     println!("search_subject: {}", keyword);
     let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
     let path = format!("/search/subject/{}?type=2", encoded_keyword);

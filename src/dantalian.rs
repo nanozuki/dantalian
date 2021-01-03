@@ -65,7 +65,7 @@ impl<'a> Dantalian<'a> {
     ///     ├── 进击的巨人 最终季 61.mp4
     ///     ├── 进击的巨人 最终季 62.mp4
     ///     └── 进击的巨人 最终季 63.mp4
-    pub async fn generate_path(&self, root: &String) -> Result<()> {
+    pub async fn generate_path(&self, root: &str) -> Result<()> {
         for e in WalkDir::new(root).max_depth(1) {
             let entry = e?;
             if entry.file_type().is_dir() {
@@ -88,11 +88,11 @@ impl<'a> Dantalian<'a> {
 
     async fn generate_anime(&self, path: &str, anime_name: &str) -> Result<()> {
         let job = collect_gen_jobs(path, anime_name)?;
-        if (!job.gen_tvshow) || job.gen_episodes.len() == 0 {
+        if (!job.gen_tvshow) || job.gen_episodes.is_empty() {
             return Ok(());
         }
         let subjects = search_anime(&anime_name.to_string()).await?;
-        if subjects.len() == 0 {
+        if subjects.is_empty() {
             return Ok(());
         }
         let subject_id = subjects[0].id;
@@ -106,17 +106,14 @@ impl<'a> Dantalian<'a> {
             println!("Done!");
         }
         for episode in anime_data.episodes {
-            match job.gen_episodes.get(&episode.ep_index) {
-                Some(ep) => {
-                    let file_name = format!("{} {}.nfo", &anime_name, ep);
-                    print!("Prepare to gen {} ... ", &file_name);
-                    let file_content = self.nfo_generator.gen_episode_nfo(&episode)?;
-                    let file_path = Path::new(path).join(file_name);
-                    let mut f = File::create(file_path)?;
-                    f.write_all(&file_content.into_bytes())?;
-                    println!("Done!");
-                }
-                None => {}
+            if let Some(ep) = job.gen_episodes.get(&episode.ep_index) {
+                let file_name = format!("{} {}.nfo", &anime_name, ep);
+                print!("Prepare to gen {} ... ", &file_name);
+                let file_content = self.nfo_generator.gen_episode_nfo(&episode)?;
+                let file_path = Path::new(path).join(file_name);
+                let mut f = File::create(file_path)?;
+                f.write_all(&file_content.into_bytes())?;
+                println!("Done!");
             }
         }
         Ok(())
@@ -246,7 +243,7 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
     if !file.file_type().is_file() {
         return FileType::Unknown;
     }
-    let file_name = match file.file_name().to_str().map(|s| String::from(s)) {
+    let file_name = match file.file_name().to_str().map(String::from) {
         Some(file_name) => file_name,
         None => {
             return FileType::Unknown;
