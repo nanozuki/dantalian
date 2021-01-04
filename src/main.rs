@@ -39,13 +39,21 @@ async fn main() -> Result<()> {
             }
             for root in gen_opts.root {
                 println!("root: {}, rescan: {:#?}", &root, &force);
-                let d = Dantalian::new();
+                let d = if let Some(ref pattern) = gen_opts.pattern {
+                    Dantalian::with_pattern(pattern.clone())
+                } else {
+                    Dantalian::new()
+                };
                 d.generate_path(&root, &force).await?;
             }
             Ok(())
         }
         SubCmd::Check(check_opts) => {
-            let d = Dantalian::new();
+            let d = if let Some(pattern) = check_opts.pattern {
+                Dantalian::with_pattern(pattern)
+            } else {
+                Dantalian::new()
+            };
             let data = d.check_anime(check_opts.subject).await?;
             println!("get anime data:\n{:#?}", &data);
             let nfos = d.gen_nfos(&data).await?;
@@ -75,6 +83,8 @@ struct GenCmd {
     root: Vec<String>,
     #[clap(long, about = "anime names which you want to rescan", required = false)]
     force: Vec<String>,
+    #[clap(long, short)]
+    pattern: Option<regex::Regex>,
 }
 
 #[derive(Clap)]
@@ -82,6 +92,8 @@ struct GenCmd {
 struct CheckCmd {
     #[clap(short, long, required = true)]
     subject: u32,
+    #[clap(long, short)]
+    pattern: Option<regex::Regex>,
 }
 
 #[derive(Clap)]

@@ -23,6 +23,13 @@ impl<'a> Dantalian<'a> {
         }
     }
 
+    pub fn with_pattern(pattern: Regex) -> Dantalian<'a> {
+        Dantalian {
+            nfo_generator: Generator::new(),
+            anime_name_re: pattern,
+        }
+    }
+
     pub async fn gen_nfos(&self, ad: &AnimeData) -> Result<AnimeNFO> {
         let tvshow = self.nfo_generator.gen_tvshow_nfo(&ad.tvshow)?;
         let mut episodes: Vec<String> = Vec::new();
