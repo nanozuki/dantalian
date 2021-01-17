@@ -10,16 +10,16 @@ repository = "https://github.com/nanozuki/dantalian/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "~3.0.0-beta.2"
+clap = "3.0.0-beta.2"
 serde = { version = "1.0.118", features = ["derive", "rc"] }
-serde_json = "1"
-serde_repr = "0.1"
-hyper = { version = "0.14", features = ["http1", "http2", "client", "runtime"] }
-tokio = { version = "1", features = ["full"] }
-anyhow = "1.0"
-futures = "0.3"
-percent-encoding = "~2"
-hyper-tls = "0.5"
-tinytemplate = "1.1"
-walkdir = "2"
-regex = "1"
+serde_json = "1.0.61"
+serde_repr = "0.1.6"
+hyper = { version = "0.14.2", features = ["http1", "http2", "client", "runtime"] }
+tokio = { version = "1.0.1", features = ["full"] }
+anyhow = "1.0.37"
+futures = "0.3.9"
+percent-encoding = "2.1.0"
+hyper-tls = "0.5.0"
+tinytemplate = "1.2.0"
+walkdir = "2.3.1"
+regex = "1.4.3"
