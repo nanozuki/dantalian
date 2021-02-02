@@ -8,6 +8,8 @@ use std::io::Write;
 use std::path::Path;
 use std::rc::Rc;
 use walkdir::{DirEntry, WalkDir};
+use toml;
+use serde::Deserialize;
 
 pub struct Dantalian<'a> {
     nfo_generator: Generator<'a>,
@@ -44,14 +46,14 @@ impl<'a> Dantalian<'a> {
     /// the files structure should follow this:
     /// media_root/
     ///     ├── ひぐらしのなく頃に 業
-    ///     │   ├── ひぐらしのなく頃に 業 01.mp4
-    ///     │   ├── ひぐらしのなく頃に 業 02.mp4
-    ///     │   ├── ひぐらしのなく頃に 業 03.mp4
-    ///     │   └── ひぐらしのなく頃に 業 04.mp4
+    ///     │   ├── ひぐらしのなく頃に 業 01.mp4
+    ///     │   ├── ひぐらしのなく頃に 業 02.mp4
+    ///     │   ├── ひぐらしのなく頃に 業 03.mp4
+    ///     │   └── ひぐらしのなく頃に 業 04.mp4
     ///     ├── 化物語
-    ///     │   ├── 化物語 01.mp4
-    ///     │   ├── 化物語 02.mp4
-    ///     │   └── 化物語 SP5_5.mp4
+    ///     │   ├── 化物語 01.mp4
+    ///     │   ├── 化物語 02.mp4
+    ///     │   └── 化物語 SP5_5.mp4
     ///     └── 进击的巨人 最终季
     ///         ├── 进击的巨人 最终季 60.mp4
     ///         ├── 进击的巨人 最终季 61.mp4
@@ -237,6 +239,7 @@ pub struct AnimeNFO {
 enum FileType {
     Unknown,
     TVShowNFO,
+    Config(String),
     EpNFO(String),
     SpNFO(String),
     EpMedia(String, String), // episode nfo : episode in filename
@@ -244,6 +247,7 @@ enum FileType {
 }
 
 struct GenerateJob {
+    subject_id:Option<String>,
     gen_tvshow: bool,
     gen_episodes: HashMap<String, String>,
     gen_sps: HashMap<String, String>,
@@ -257,6 +261,7 @@ impl GenerateJob {
 
 fn collect_gen_jobs(path: &str, anime_name: &str, force: bool) -> Result<GenerateJob> {
     let mut job = GenerateJob {
+        subject_id: None,
         gen_tvshow: true,
         gen_episodes: HashMap::new(),
         gen_sps: HashMap::new(),
@@ -285,6 +290,10 @@ fn collect_gen_jobs(path: &str, anime_name: &str, force: bool) -> Result<Generat
             FileType::SpMedia(epi, ep) => {
                 has_sp_media.insert(epi, ep);
             }
+            FileType::Config(filename) => {
+                let subject_id = parse_subject_config_file(&filename)?;
+                job.subject_id = Some(subject_id);
+            }
             _ => {}
         }
     }
@@ -301,6 +310,8 @@ fn collect_gen_jobs(path: &str, anime_name: &str, force: bool) -> Result<Generat
     Ok(job)
 }
 
+const DIR_CONFIG_NAME: &str = "dantalian.toml";
+
 fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
     if !file.file_type().is_file() {
         return FileType::Unknown;
@@ -313,6 +324,8 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
     };
     if file_name == TVSHOW_NFO_NAME {
         return FileType::TVShowNFO;
+    } else if file_name == DIR_CONFIG_NAME {
+        return FileType::Config(String::from(file_name));
     }
     // shouldn't be error
     let episode_re =
@@ -340,4 +353,15 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
         (false, true) => FileType::SpMedia(String::from(ep_index), String::from(ep_file)),
         (false, false) => FileType::EpMedia(String::from(ep_index), String::from(ep_file)),
     }
+}
+
+#[derive(Deserialize, Debug)]
+struct SubjectConfig {
+    subject_id: String,
+}
+
+fn parse_subject_config_file(filepath: &String) -> Result<String> {
+    let file = std::fs::read_to_string(&filepath)?;
+    let config: SubjectConfig = toml::from_str(file.as_ref())?;
+    Ok(config.subject_id)
 }
