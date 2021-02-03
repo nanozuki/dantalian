@@ -212,9 +212,9 @@ jobs:
         mkdir -p '${{ steps.vars.outputs.STAGING }}'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}'
     - name: Build static
-      uses:  stevenleadbeater/rust-musl-builder@master
+      uses: stevenleadbeater/rust-musl-builder@master
       with:
-          args: /bin/bash -c "cargo build --release --target=x86_64-unknown-linux-musl"
+        args: /bin/bash -c "cargo build --release --target=x86_64-unknown-linux-musl"
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
@@ -227,7 +227,7 @@ jobs:
         cp 'target/x86_64-unknown-linux-musl/release/${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # base compressed package
         pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
-	      tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/*
+        tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/*
         popd >/dev/null
     - name: Publish
       uses: softprops/action-gh-release@v1
@@ -237,4 +237,3 @@ jobs:
           ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
