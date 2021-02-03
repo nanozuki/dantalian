@@ -227,7 +227,7 @@ jobs:
         cp 'target/x86_64-unknown-linux-musl/release/${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # base compressed package
         pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
-				tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/*
+	      tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/*
         popd >/dev/null
     - name: Publish
       uses: softprops/action-gh-release@v1
