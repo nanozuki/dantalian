@@ -2,14 +2,14 @@ use crate::bangumi::{get_anime_data, search_anime, BgmAnime, EpisodeStatus, Epis
 use crate::nfogen::{Actor, Episode, Generator, TVShow, TVSHOW_NFO_NAME};
 use anyhow::{Context, Result};
 use regex::Regex;
+use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::rc::Rc;
-use walkdir::{DirEntry, WalkDir};
 use toml;
-use serde::Deserialize;
+use walkdir::{DirEntry, WalkDir};
 
 pub struct Dantalian<'a> {
     nfo_generator: Generator<'a>,
@@ -95,11 +95,16 @@ impl<'a> Dantalian<'a> {
         if job.is_empty() {
             return Ok(());
         }
-        let subjects = search_anime(&anime_name.to_string()).await?;
-        if subjects.is_empty() {
-            return Ok(());
-        }
-        let subject_id = subjects[0].id;
+        let subject_id: u32 = match job.subject_id {
+            Some(id) => id,
+            None => {
+                let subjects = search_anime(&anime_name.to_string()).await?;
+                if subjects.is_empty() {
+                    return Ok(());
+                }
+                subjects[0].id
+            }
+        };
         let anime_data = AnimeData::from(get_anime_data(subject_id).await?);
         if job.gen_tvshow {
             print!("Prepare to gen tvshow.nfo for '{}' ... ", &anime_name);
@@ -247,7 +252,7 @@ enum FileType {
 }
 
 struct GenerateJob {
-    subject_id:Option<String>,
+    subject_id: Option<u32>,
     gen_tvshow: bool,
     gen_episodes: HashMap<String, String>,
     gen_sps: HashMap<String, String>,
@@ -357,10 +362,10 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
 
 #[derive(Deserialize, Debug)]
 struct SubjectConfig {
-    subject_id: String,
+    subject_id: u32,
 }
 
-fn parse_subject_config_file(filepath: &String) -> Result<String> {
+fn parse_subject_config_file(filepath: &String) -> Result<u32> {
     let file = std::fs::read_to_string(&filepath)?;
     let config: SubjectConfig = toml::from_str(file.as_ref())?;
     Ok(config.subject_id)
