@@ -11,6 +11,10 @@ use std::rc::Rc;
 use toml;
 use walkdir::{DirEntry, WalkDir};
 
+mod anime_dir;
+mod config;
+mod job;
+
 pub struct Dantalian<'a> {
     nfo_generator: Generator<'a>,
     anime_name_re: Regex,
@@ -82,6 +86,23 @@ impl<'a> Dantalian<'a> {
         }
         Ok(())
     }
+    /*
+     * let anime = AnimePath(e?)?;
+     * let anime_name = anime.name()
+     * let jobs = anime.inspect(force).await?;
+     * for job in jobs {
+     *     job.generate_file().await?;
+     * }
+     */
+
+    /* AnimePath:
+     * inspect() {
+     *      let config = self.parse_config()
+     *      let anime_name = self.anime_name() { self.config }
+     *      let files = self.detective_path()
+     *      let gen_job = self.gen_job() { self.anime_name, self.files }
+     * }
+     */
 
     pub fn cap_anime_name(&self, dir_name: &str) -> Option<String> {
         self.anime_name_re
@@ -334,7 +355,7 @@ fn check_file(file: &DirEntry, anime_name: &str) -> FileType {
     }
     // shouldn't be error
     let episode_re =
-        Regex::new(format!(r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.", anime_name).as_str())
+        Regex::new(format!(r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[_\d]+\d)\.", anime_name).as_str())
             .unwrap();
     let cap = match episode_re.captures(&file_name) {
         Some(cap) => cap,
