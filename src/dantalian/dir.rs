@@ -3,13 +3,13 @@ use walkdir::DirEntry;
 
 use super::config::Config;
 
-struct AnimeDir {
-    dir: DirEntry,
-    config: Config,
+pub struct AnimeDir {
+    pub dir: DirEntry,
+    pub config: Config,
 }
 
 impl AnimeDir {
-    async fn new(dir: DirEntry) -> Result<AnimeDir> {
+    pub async fn new(dir: DirEntry) -> Result<AnimeDir> {
         if !dir.file_type().is_dir() {
             bail!("{} is not a directory", dir.path().display());
         }
