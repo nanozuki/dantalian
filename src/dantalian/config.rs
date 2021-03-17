@@ -38,17 +38,9 @@ impl Config {
             }),
             None => {
                 let subject = get_subject_info(cf.subject_id).await?;
-                let name = filepath.to_str().unwrap().contains(&subject.name);
-                let name_cn = filepath.to_str().unwrap().contains(&subject.name_cn);
-                let anime_name = match (name, name_cn) {
-                    (true, true) => bail!("confusing anime name in file path"),
-                    (true, false) => &subject.name,
-                    (false, true) => &subject.name_cn,
-                    (false, false) => bail!("can't find anime name in path"),
-                };
                 Ok(Config {
                     subject_id: cf.subject_id,
-                    episode_re: default_ep_regex(anime_name)?,
+                    episode_re: default_ep_regex(&subject.name, &subject.name_cn)?,
                 })
             }
         }
@@ -90,8 +82,9 @@ fn cap_anime_name(dir_name: &str) -> Option<String> {
         .map(|mat| String::from(mat.as_str()))
 }
 
-fn default_ep_regex(anime_name: &str) -> Result<Regex> {
-    Ok(Regex::new(
-        format!(r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.", anime_name).as_str(),
-    )?)
+fn default_ep_regex(name: &str, name_cn: &str) -> Result<Regex> {
+    Ok(Regex::new(&format!(
+        r"^(?P<name>{}|{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.",
+        name, name_cn
+    ))?)
 }

@@ -4,28 +4,28 @@ use std::ffi::OsStr;
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 
-struct Job {
-    subject_id: u32,
-    should_gen_tvshow: bool,
-    episodes: Vec<EpisodeJob>,
+pub struct Job {
+    pub subject_id: u32,
+    pub should_gen_tvshow: bool,
+    pub episodes: Vec<EpisodeJob>,
 }
 
 struct TVShowJob {
     filename: String,
 }
 
-struct EpisodeJob {
-    index: f64,
-    is_sp: bool,
-    filename: String,
+pub struct EpisodeJob {
+    pub index: String,
+    pub is_sp: bool,
+    pub filename: String,
 }
 
 const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
 
 impl Job {
     pub fn parse(dir: &Path, config: &Config, force: bool) -> Result<Job> {
-        let tvshowfile = dir.join(TVSHOW_NFO_NAME);
-        let should_gen_tvshow = force || tvshowfile.exists();
+        let tv_show_file = dir.join(TVSHOW_NFO_NAME);
+        let should_gen_tvshow = force || tv_show_file.exists();
         let mut episodes: Vec<EpisodeJob> = vec![];
         for e in WalkDir::new(dir).min_depth(1).max_depth(1) {
             let entry = e?;
@@ -67,7 +67,7 @@ impl Job {
             return Ok(None);
         }
         let caps = config.episode_re.captures(file_name);
-        let ep: f64 = match caps.as_ref().and_then(|c| c.name("ep")) {
+        let ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
             Some(ep_match) => ep_match.as_str().parse()?,
             None => return Ok(None),
         };
@@ -77,7 +77,11 @@ impl Job {
         return Ok(Some(EpisodeJob {
             index: ep,
             is_sp: sp,
-            filename: String::from(file_name),
+            filename: String::from(nfo_file_path),
         }));
+    }
+
+    pub fn is_empty(&self) -> bool {
+        (!self.should_gen_tvshow) && (self.episodes.len() == 0)
     }
 }

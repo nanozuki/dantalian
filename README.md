@@ -43,8 +43,8 @@ In general, this thing has the following peculiarity:
 │   ├── 化物語 01.nfo
 │   ├── 化物語 02.mp4
 │   ├── 化物語 02.nfo
-│   ├── 化物語 SP5_5.mp4
-│   └── 化物語 SP5_5.nfo
+│   ├── 化物語 SP5.5.mp4
+│   └── 化物語 SP5.5.nfo
 └── 进击的巨人 最终季
     ├── tvshow.nfo
     ├── 进击的巨人 最终季 60.mp4

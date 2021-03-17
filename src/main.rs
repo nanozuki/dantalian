@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use dantalian::bangumi;
-use dantalian::dantalian::Dantalian;
+use dantalian::dantalian::dantalian;
 use std::collections::HashSet;
 
 #[derive(Clap)]
@@ -39,8 +39,7 @@ async fn main() -> Result<()> {
             }
             for root in gen_opts.root {
                 println!("root: {}, rescan: {:#?}", &root, &force);
-                let d = Dantalian::new();
-                d.generate_path(&root, &force).await?;
+                dantalian(&root, &force).await?;
             }
             Ok(())
         }
