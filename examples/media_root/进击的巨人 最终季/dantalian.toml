@@ -1,0 +1,2 @@
+subject_id = 285666
+episode_re = "^(?P<name>进击的巨人 最终季) (?P<sp>SP)?(?P<ep>[_\\d]+)\\."

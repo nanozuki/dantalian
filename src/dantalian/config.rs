@@ -1,8 +1,10 @@
 use crate::bangumi::{get_subject_info, search_anime};
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -40,16 +42,22 @@ impl Config {
             }),
             None => {
                 let subject = get_subject_info(cf.subject_id).await?;
+                let name_qry = format!("{}|{}", subject.name, subject.name_cn);
                 Ok(Config {
                     subject_id: cf.subject_id,
-                    episode_re: default_ep_regex(&format!("{}|{}", subject.name, subject.name_cn))?,
+                    episode_re: default_ep_regex(&name_qry)?,
                 })
             }
         }
     }
 
     async fn parse_from_dirname(path: &Path) -> Result<Config> {
-        let anime_name = path.to_str().and_then(|f| cap_anime_name(f));
+        let dirname = path
+            .file_name()
+            .ok_or(anyhow!("invalid path"))?
+            .to_str()
+            .ok_or(anyhow!("invalid path"))?;
+        let anime_name = cap_anime_name(dirname);
         match anime_name {
             Some(name) => {
                 let subjects = search_anime(&name).await?;
@@ -65,12 +73,13 @@ impl Config {
         }
     }
 
-    fn save(&self, dir: &Path) -> Result<()> {
+    fn save(&self, filepath: &Path) -> Result<()> {
         let file_content = toml::to_string(&ConfigFile {
             subject_id: self.subject_id,
             episode_re: Some(self.episode_re.to_string()),
         })?;
-        std::fs::write(dir.join(DIR_CONFIG_NAME), file_content)?;
+        let mut f = File::create(filepath)?;
+        f.write_all(&file_content.into_bytes())?;
         Ok(())
     }
 }

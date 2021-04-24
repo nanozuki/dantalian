@@ -4,11 +4,18 @@ use hyper::{Client, Uri};
 use hyper_tls::HttpsConnector;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
+use std::time::SystemTime;
 
 pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
     println!("search_subject: {}", keyword);
     let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
-    let path = format!("/search/subject/{}?type=2", encoded_keyword);
+    let ts = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)?
+        .as_secs();
+    let path = format!(
+        "/search/subject/{}?type=2&chii_searchDateLine={}",
+        encoded_keyword, ts,
+    );
     println!("request url {}", path);
     let res_obj: SearchResponse = request(&path)
         .await
@@ -50,8 +57,7 @@ pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
     Ok(res.eps)
 }
 
-// mirror of "https://api.bgm.tv" for scripts.
-const BASE_URL: &str = "https://mirror.api.bgm.rin.cat";
+const BASE_URL: &str = "https://api.bgm.tv";
 
 #[derive(Deserialize, Debug)]
 struct SearchResponse {

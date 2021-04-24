@@ -54,8 +54,12 @@ async fn handle_dir(path: &Path, force: bool) -> Result<()> {
     }
     for episode in job.episodes {
         let data = anime_data
-            .find_episode(episode.index, episode.is_sp)
-            .ok_or(anyhow!("Can't find anime data"))?;
+            .find_episode(&episode.index, episode.is_sp)
+            .ok_or(anyhow!(
+                "Can't find ep {}, is_sp {}",
+                episode.index,
+                episode.is_sp
+            ))?;
         let file_str = generator.gen_episode_nfo(data)?;
         let mut f = File::create(&episode.filename)?;
         f.write_all(&file_str.into_bytes())?;
