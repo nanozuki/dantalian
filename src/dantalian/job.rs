@@ -1,5 +1,5 @@
 use super::config::Config;
-use anyhow::{bail, Result};
+use anyhow::{anyhow, Result};
 use std::ffi::OsStr;
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
@@ -8,10 +8,6 @@ pub struct Job {
     pub subject_id: u32,
     pub should_gen_tvshow: bool,
     pub episodes: Vec<EpisodeJob>,
-}
-
-struct TVShowJob {
-    filename: String,
 }
 
 pub struct EpisodeJob {
@@ -77,7 +73,11 @@ impl Job {
         return Ok(Some(EpisodeJob {
             index: ep,
             is_sp: sp,
-            filename: String::from(nfo_file_path),
+            filename: String::from(
+                nfo_file_path
+                    .to_str()
+                    .ok_or(anyhow!("invalid nfo file name"))?,
+            ),
         }));
     }
 

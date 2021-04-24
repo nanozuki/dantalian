@@ -1,6 +1,5 @@
-use crate::bangumi::{get_anime_data, BgmAnime, EpisodeStatus, EpisodeType};
+use crate::bangumi::{BgmAnime, EpisodeStatus, EpisodeType};
 use crate::nfogen::{Actor, Episode, TVShow};
-use anyhow::Result;
 use std::rc::Rc;
 
 // AnimeData store data for generator nfo files.
@@ -11,8 +10,13 @@ pub struct AnimeData {
 }
 
 impl AnimeData {
-    pub async fn new(subject_id: u32) -> Result<AnimeData> {
-        Ok(AnimeData::from(get_anime_data(subject_id).await?))
+    pub fn find_episode(&self, index: String, is_sp: bool) -> Option<&Episode> {
+        for ep in self.episodes.iter() {
+            if ep.ep_index == index && ep.is_sp == is_sp {
+                return Some(ep);
+            }
+        }
+        None
     }
 }
 
@@ -104,14 +108,5 @@ impl From<BgmAnime> for AnimeData {
             }
         }
         data
-    }
-
-    fn find_episode(&self, index: String, is_sp: bool) -> Option<&Episode> {
-        for ep in self.episodes {
-            if ep.ep_index == index && ep.is_sp == is_sp {
-                Ok(&ep)
-            }
-        }
-        None
     }
 }

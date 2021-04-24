@@ -10,9 +10,8 @@ episodes not published in TV into Season 00, including all SPs and OVAs. It is n
 has multiple OVAs or SPs series, especially the ["Monogatari (series)"](https://www.themoviedb.org/tv/46195/season/0).
 [AniDB](https://anidb.net/) put episodes in the right place, but It only has English Infos.
 
-So, Dantalian uses bangumi as animes source to generate nfo files. In media center software like Jellyfin or Kodi, nfo
-files have higher priority than scrapers. As bangumi is not design for anime media files database, some of the data has
-lacked.
+So, Dantalian uses bangumi as anime source to generate nfo files. In media center software like Jellyfin or Kodi, nfo
+files have higher priority than scrapers. As bangumi is not design for anime media file database, some data has lacked.
 
 In general, this thing has the following peculiarity:
 

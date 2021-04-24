@@ -43,17 +43,6 @@ async fn main() -> Result<()> {
             }
             Ok(())
         }
-        SubCmd::Check(check_opts) => {
-            let d = Dantalian::new();
-            let data = d.check_anime(check_opts.subject).await?;
-            println!("get anime data:\n{:#?}", &data);
-            let nfos = d.gen_nfos(&data).await?;
-            println!("gen tvshow file:\n{}", &nfos.tvshow);
-            for e in nfos.episodes.iter() {
-                println!("gen episode file:\n{}", &e);
-            }
-            Ok(())
-        }
     }
 }
 
@@ -61,8 +50,6 @@ async fn main() -> Result<()> {
 enum SubCmd {
     #[clap()]
     Gen(GenCmd),
-    #[clap()]
-    Check(CheckCmd),
     #[clap()]
     Bgm(BgmCmd),
 }
@@ -74,13 +61,6 @@ struct GenCmd {
     root: Vec<String>,
     #[clap(long, about = "anime names which you want to rescan", required = false)]
     force: Vec<String>,
-}
-
-#[derive(Clap)]
-#[clap(about = "gen nfo files for spci")]
-struct CheckCmd {
-    #[clap(short, long, required = true)]
-    subject: u32,
 }
 
 #[derive(Clap)]

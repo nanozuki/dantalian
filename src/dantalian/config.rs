@@ -22,10 +22,12 @@ const DIR_CONFIG_NAME: &str = "dantalian.toml";
 impl Config {
     pub async fn parse(path: &Path) -> Result<Config> {
         let filepath = path.join(DIR_CONFIG_NAME);
-        match filepath.exists() {
-            true => Self::parse_from_file(&filepath).await,
-            false => Self::parse_from_dirname(path).await,
-        }
+        let config = match filepath.exists() {
+            true => Self::parse_from_file(&filepath).await?,
+            false => Self::parse_from_dirname(path).await?,
+        };
+        config.save(filepath.as_path())?;
+        Ok(config)
     }
 
     async fn parse_from_file(filepath: &Path) -> Result<Config> {
@@ -40,7 +42,7 @@ impl Config {
                 let subject = get_subject_info(cf.subject_id).await?;
                 Ok(Config {
                     subject_id: cf.subject_id,
-                    episode_re: default_ep_regex(&subject.name, &subject.name_cn)?,
+                    episode_re: default_ep_regex(&format!("{}|{}", subject.name, subject.name_cn))?,
                 })
             }
         }
@@ -63,7 +65,7 @@ impl Config {
         }
     }
 
-    async fn save(&self, dir: &Path) -> Result<()> {
+    fn save(&self, dir: &Path) -> Result<()> {
         let file_content = toml::to_string(&ConfigFile {
             subject_id: self.subject_id,
             episode_re: Some(self.episode_re.to_string()),
@@ -82,9 +84,9 @@ fn cap_anime_name(dir_name: &str) -> Option<String> {
         .map(|mat| String::from(mat.as_str()))
 }
 
-fn default_ep_regex(name: &str, name_cn: &str) -> Result<Regex> {
+fn default_ep_regex(name_qry: &str) -> Result<Regex> {
     Ok(Regex::new(&format!(
-        r"^(?P<name>{}|{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.",
-        name, name_cn
+        r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.",
+        name_qry
     ))?)
 }
