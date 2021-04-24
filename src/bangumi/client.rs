@@ -5,9 +5,12 @@ use hyper_tls::HttpsConnector;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
 use std::time::SystemTime;
+use log::{info, debug, trace};
+use std::fmt;
+use crate::bangumi::EpisodeStatus;
 
 pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
-    println!("search_subject: {}", keyword);
+    info!("search anime '{}':", keyword);
     let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
     let ts = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)?
@@ -16,11 +19,17 @@ pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
         "/search/subject/{}?type=2&chii_searchDateLine={}",
         encoded_keyword, ts,
     );
-    println!("request url {}", path);
+    trace!("request url {}", path);
     let res_obj: SearchResponse = request(&path)
         .await
         .with_context(|| "request search anime")?;
-    println!("obj: {:?}", &res_obj);
+    debug!("obj: {:?}", &res_obj);
+    info!("found {} result(s):\n", &res_obj.results);
+    for item in res_obj.list.iter() {
+        info!("    * {} / {}", item.name, item.name_cn);
+        info!("      Subject ID: {}", item.id);
+        info!("      URL: {}", item.url);
+    }
     Ok(res_obj.list)
 }
 
@@ -36,24 +45,25 @@ pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
 }
 
 pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
-    println!("get_subject_info: {}", id);
     let path = format!("/subject/{}?responseGroup=medium", id);
     let subject: SubjectMedium = request(&path)
         .await
         .with_context(|| format!("request get subject: {}", id))?;
-    println!("subject: {:#?}", &subject);
+    debug!("subject: {:#?}", &subject);
+    info!("{}", &subject);
     Ok(subject)
 }
 
 pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
-    println!("get_subject_info: {}", id);
+    trace!("get_subject_info: {}", id);
     let path = format!("/subject/{}/ep", id);
     let res: EpisodeResponse = request(&path)
         .await
         .with_context(|| format!("get subject episode {}", id))?;
     for ep in &res.eps {
-        println!("subject ep: {:#?}", &ep);
+        debug!("subject ep: {:#?}", &ep);
     }
+    info!("{}", &res);
     Ok(res.eps)
 }
 
@@ -71,15 +81,24 @@ pub struct EpisodeResponse {
     pub eps: Vec<Episode>,
 }
 
+impl fmt::Display for EpisodeResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for ep in self.eps.iter().filter(|ep| ep.status != EpisodeStatus::NA) {
+            write!(f, "{} {}\t{} / {}\n", ep.episode_type, ep.sort, ep.name, ep.name_cn)?;
+        }
+        Ok(())
+    }
+}
+
 async fn request<T: DeserializeOwned>(path: &str) -> Result<T> {
     let https = HttpsConnector::new();
     let client = Client::builder().build::<_, hyper::Body>(https);
     let url: Uri = format!("{}{}", BASE_URL, path)
         .parse()
         .with_context(|| "parse url")?;
-    println!("url = {}", &url);
+    debug!("url = {}", &url);
     let res = client.get(url).await.with_context(|| "get request")?;
-    println!("status: {}", res.status());
+    debug!("status: {}", res.status());
     let buf = hyper::body::to_bytes(res)
         .await
         .with_context(|| "read body")?;

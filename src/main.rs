@@ -2,65 +2,54 @@ use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use dantalian::bangumi;
 use dantalian::dantalian::dantalian;
+use dantalian::logger::Logger;
+use log::set_logger;
 use std::collections::HashSet;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
 struct Opts {
+    #[clap(short, long, about="enable verbose")]
+    verbose: bool,
+    #[clap(long, about = "path root of anime media files", required = false)]
+    root: Vec<String>,
+    #[clap(long, about = "dir names which you want to force re-generate", required = false)]
+    force: Vec<String>,
     #[clap(subcommand)]
-    subcmd: SubCmd,
+    subcmd: Option<SubCmd>,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
+    match opts.verbose {
+        true => set_logger(Logger::init(log::LevelFilter::Trace)).unwrap(),
+        false => set_logger(Logger::init(log::LevelFilter::Info)).unwrap(),
+    }
     match opts.subcmd {
-        SubCmd::Bgm(sub_opts) => match sub_opts.subcmd {
-            BgmSubCmd::Search(search_opts) => {
-                println!("search anime {}", search_opts.keyword);
-                let _ = bangumi::search_anime(&search_opts.keyword).await?;
-                Ok(())
-            }
-            BgmSubCmd::Get(get_opts) => {
-                println!("get subject {}", get_opts.id);
-                let _ = bangumi::get_subject_info(get_opts.id).await?;
-                Ok(())
-            }
-            BgmSubCmd::GetEp(get_opts) => {
-                println!("get subject {}", get_opts.id);
-                let _ = bangumi::get_subject_episodes(get_opts.id).await?;
-                Ok(())
-            }
-        },
-        SubCmd::Gen(gen_opts) => {
+        None => {
             let mut force: HashSet<String> = HashSet::new();
-            for f in gen_opts.force {
+            for f in opts.force {
                 force.insert(f);
             }
-            for root in gen_opts.root {
+            for root in opts.root {
                 println!("root: {}, rescan: {:#?}", &root, &force);
                 dantalian(&root, &force).await?;
             }
             Ok(())
-        }
+        },
+        Some(subcmd) => {
+            match subcmd {
+                SubCmd::Bgm(sub_opts) => bgm_cmd(sub_opts).await,
+            }
+        },
     }
 }
 
 #[derive(Clap)]
 enum SubCmd {
     #[clap()]
-    Gen(GenCmd),
-    #[clap()]
     Bgm(BgmCmd),
-}
-
-#[derive(Clap)]
-#[clap(about = "gen nfo files for spci")]
-struct GenCmd {
-    #[clap(long, about = "path root of anime media files", required = true)]
-    root: Vec<String>,
-    #[clap(long, about = "anime names which you want to rescan", required = false)]
-    force: Vec<String>,
 }
 
 #[derive(Clap)]
@@ -81,7 +70,7 @@ enum BgmSubCmd {
 #[clap(about = "search keyword")]
 struct BgmSearchOpt {
     #[clap(about = "search keyword")]
-    keyword: String,
+    keyword: Vec<String>,
 }
 
 #[derive(Clap)]
@@ -97,3 +86,22 @@ struct BgmGetSubjectEpsOpt {
     #[clap(about = "subject id")]
     id: u32,
 }
+
+async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
+    match opts.subcmd {
+        BgmSubCmd::Search(search_opts) => {
+            let keyword = &search_opts.keyword.join(" ");
+            let _ = bangumi::search_anime(keyword).await?;
+            Ok(())
+        }
+        BgmSubCmd::Get(get_opts) => {
+            let _ = bangumi::get_subject_info(get_opts.id).await?;
+            Ok(())
+        }
+        BgmSubCmd::GetEp(get_opts) => {
+            let _ = bangumi::get_subject_episodes(get_opts.id).await?;
+            Ok(())
+        }
+    }
+}
+

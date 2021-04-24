@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use serde_repr::Deserialize_repr;
+use std::fmt;
 
 #[derive(Deserialize_repr, Debug)]
 #[repr(u32)]
@@ -95,6 +96,25 @@ pub struct SubjectMedium {
     pub staff: Vec<Staff>,
 }
 
+impl fmt::Display for SubjectMedium {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "* {} / {}\n", self.name, self.name_cn)?;
+        write!(f, "* {}\n", self.url)?;
+        let crts: String = self.crt.iter()
+            .map(|c| c.name.as_str())
+            .collect::<Vec<&str>>()
+            .join("/");
+        let staff: String = self.staff.iter()
+            .map(|s| s.name.as_str())
+            .collect::<Vec<&str>>()
+            .join("/");
+        write!(f, "* crts: {}\n", crts)?;
+        write!(f, "* staff: {}\n", staff)?;
+        write!(f, "* {}", self.summary)?;
+        Ok(())
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Character {
     pub id: u32,
@@ -147,6 +167,20 @@ pub enum EpisodeType {
     CM = 4,
     MAD = 5,
     Other = 6,
+}
+
+impl fmt::Display for EpisodeType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            EpisodeType::Honpen => write!(f, ""),
+            EpisodeType::Sp => write!(f, "SP"),
+            EpisodeType::OP => write!(f, "OP"),
+            EpisodeType::ED => write!(f, "ED"),
+            EpisodeType::CM => write!(f, "CM"),
+            EpisodeType::MAD => write!(f, "MAD"),
+            EpisodeType::Other => write!(f, "Other"),
+        }
+    }
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
