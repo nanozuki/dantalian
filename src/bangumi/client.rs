@@ -1,13 +1,13 @@
 use super::types::{Episode, SubjectBase, SubjectMedium};
+use crate::bangumi::EpisodeStatus;
 use anyhow::{Context, Result};
 use hyper::{Client, Uri};
 use hyper_tls::HttpsConnector;
+use log::{debug, info, trace};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
-use std::time::SystemTime;
-use log::{info, debug, trace};
 use std::fmt;
-use crate::bangumi::EpisodeStatus;
+use std::time::SystemTime;
 
 pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
     info!("search anime '{}':", keyword);
@@ -84,7 +84,11 @@ pub struct EpisodeResponse {
 impl fmt::Display for EpisodeResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for ep in self.eps.iter().filter(|ep| ep.status != EpisodeStatus::NA) {
-            writeln!(f, "{} {}\t{} / {}", ep.episode_type, ep.sort, ep.name, ep.name_cn)?;
+            writeln!(
+                f,
+                "{} {}\t{} / {}",
+                ep.episode_type, ep.sort, ep.name, ep.name_cn
+            )?;
         }
         Ok(())
     }

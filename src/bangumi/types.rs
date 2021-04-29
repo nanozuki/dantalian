@@ -100,11 +100,15 @@ impl fmt::Display for SubjectMedium {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "* {} / {}", self.name, self.name_cn)?;
         writeln!(f, "* {}", self.url)?;
-        let crts: String = self.crt.iter()
+        let crts: String = self
+            .crt
+            .iter()
             .map(|c| c.name.as_str())
             .collect::<Vec<&str>>()
             .join("/");
-        let staff: String = self.staff.iter()
+        let staff: String = self
+            .staff
+            .iter()
             .map(|s| s.name.as_str())
             .collect::<Vec<&str>>()
             .join("/");
