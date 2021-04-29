@@ -76,7 +76,7 @@ impl Job {
             filename: String::from(
                 nfo_file_path
                     .to_str()
-                    .ok_or(anyhow!("invalid nfo file name"))?,
+                    .ok_or_else(|| anyhow!("invalid nfo file name"))?,
             ),
         }));
     }

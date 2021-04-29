@@ -84,7 +84,7 @@ pub struct EpisodeResponse {
 impl fmt::Display for EpisodeResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for ep in self.eps.iter().filter(|ep| ep.status != EpisodeStatus::NA) {
-            write!(f, "{} {}\t{} / {}\n", ep.episode_type, ep.sort, ep.name, ep.name_cn)?;
+            writeln!(f, "{} {}\t{} / {}", ep.episode_type, ep.sort, ep.name, ep.name_cn)?;
         }
         Ok(())
     }

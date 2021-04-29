@@ -57,7 +57,7 @@ async fn handle_dir(path: &Path, force: bool) -> Result<()> {
     for episode in job.episodes {
         let data = anime_data
             .find_episode(&episode.index, episode.is_sp)
-            .ok_or(anyhow!(
+            .ok_or_else(|| anyhow!(
                 "Can't find ep {}, is_sp {}",
                 episode.index,
                 episode.is_sp
