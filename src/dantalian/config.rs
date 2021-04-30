@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use log::info;
+use crate::logger::indent;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct ConfigFile {
@@ -33,6 +35,7 @@ impl Config {
     }
 
     async fn parse_from_file(filepath: &Path) -> Result<Config> {
+        info!("{}Parse config file", indent(2));
         let file = std::fs::read_to_string(filepath)?;
         let cf: ConfigFile = toml::from_str(file.as_ref())?;
         match cf.episode_re {
@@ -52,6 +55,7 @@ impl Config {
     }
 
     async fn parse_from_dirname(path: &Path) -> Result<Config> {
+        info!("{}Not found config file, create one", indent(2));
         let dirname = path
             .file_name()
             .ok_or_else(|| anyhow!("invalid path"))?

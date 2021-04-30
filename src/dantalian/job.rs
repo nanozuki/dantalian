@@ -64,7 +64,7 @@ impl Job {
         }
         let caps = config.episode_re.captures(file_name);
         let ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
-            Some(ep_match) => String::from(ep_match.as_str().parse::<String>()?.trim_matches('0')),
+            Some(ep_match) => String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0')),
             None => return Ok(None),
         };
         let sp = caps

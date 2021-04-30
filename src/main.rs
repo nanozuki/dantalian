@@ -37,7 +37,6 @@ async fn main() -> Result<()> {
                 force.insert(f);
             }
             for root in opts.root {
-                println!("root: {}, rescan: {:#?}", &root, &force);
                 dantalian(&root, &force).await?;
             }
             Ok(())
