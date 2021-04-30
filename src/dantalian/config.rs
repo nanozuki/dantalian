@@ -54,13 +54,13 @@ impl Config {
     async fn parse_from_dirname(path: &Path) -> Result<Config> {
         let dirname = path
             .file_name()
-            .ok_or(anyhow!("invalid path"))?
+            .ok_or_else(|| anyhow!("invalid path"))?
             .to_str()
-            .ok_or(anyhow!("invalid path"))?;
+            .ok_or_else(|| anyhow!("invalid path"))?;
         let anime_name = cap_anime_name(dirname);
         match anime_name {
             Some(name) => {
-                let subjects = search_anime(&name).await?;
+                let subjects = search_anime(&name).await?.list;
                 if subjects.is_empty() {
                     bail!("not found");
                 }

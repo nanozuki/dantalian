@@ -1,9 +1,11 @@
 use crate::bangumi::get_anime_data;
+use crate::logger::indent;
 use crate::nfogen::{Generator, TVSHOW_NFO_NAME};
 use anyhow::{anyhow, Context, Result};
 use config::Config;
 use data::AnimeData;
 use job::Job;
+use log::info;
 use output::out;
 use std::collections::HashSet;
 use std::fs::File;
@@ -19,7 +21,7 @@ mod output;
 mod utils;
 
 pub async fn dantalian(media_root: &str, forces: &HashSet<String>) -> Result<()> {
-    out(0, &format!("Run dantalian for {}", media_root));
+    info!("{}Run dantalian for {}", indent(1), media_root);
     for e in WalkDir::new(media_root).min_depth(1).max_depth(1) {
         let entry = e?;
         if entry.file_type().is_dir() {
@@ -55,11 +57,7 @@ async fn handle_dir(path: &Path, force: bool) -> Result<()> {
     for episode in job.episodes {
         let data = anime_data
             .find_episode(&episode.index, episode.is_sp)
-            .ok_or(anyhow!(
-                "Can't find ep {}, is_sp {}",
-                episode.index,
-                episode.is_sp
-            ))?;
+            .ok_or_else(|| anyhow!("Can't find ep {}, is_sp {}", episode.index, episode.is_sp))?;
         let file_str = generator.gen_episode_nfo(data)?;
         let mut f = File::create(&episode.filename)?;
         f.write_all(&file_str.into_bytes())?;
