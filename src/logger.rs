@@ -1,9 +1,9 @@
-use log::{Metadata, Record, set_max_level, LevelFilter};
+use log::{set_max_level, LevelFilter, Metadata, Record};
 
 #[derive(Debug)]
 pub struct Logger {}
 
-static INSTANCE: Logger = Logger{};
+static INSTANCE: Logger = Logger {};
 
 impl Logger {
     pub fn init(level: LevelFilter) -> &'static Logger {
@@ -38,5 +38,3 @@ pub fn indent(i: u8) -> String {
         String::from(&INDENTS[..i as usize])
     }
 }
-
-

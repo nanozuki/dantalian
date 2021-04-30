@@ -98,18 +98,22 @@ pub struct SubjectMedium {
 
 impl fmt::Display for SubjectMedium {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "* {} / {}\n", self.name, self.name_cn)?;
-        write!(f, "* {}\n", self.url)?;
-        let crts: String = self.crt.iter()
+        writeln!(f, "* {} / {}", self.name, self.name_cn)?;
+        writeln!(f, "* {}", self.url)?;
+        let crts: String = self
+            .crt
+            .iter()
             .map(|c| c.name.as_str())
             .collect::<Vec<&str>>()
             .join("/");
-        let staff: String = self.staff.iter()
+        let staff: String = self
+            .staff
+            .iter()
             .map(|s| s.name.as_str())
             .collect::<Vec<&str>>()
             .join("/");
-        write!(f, "* crts: {}\n", crts)?;
-        write!(f, "* staff: {}\n", staff)?;
+        writeln!(f, "* crts: {}", crts)?;
+        writeln!(f, "* staff: {}", staff)?;
         write!(f, "* {}", self.summary)?;
         Ok(())
     }

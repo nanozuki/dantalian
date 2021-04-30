@@ -9,11 +9,15 @@ use std::collections::HashSet;
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
 struct Opts {
-    #[clap(short, long, about="enable verbose")]
+    #[clap(short, long, about = "enable verbose")]
     verbose: bool,
     #[clap(long, about = "path root of anime media files", required = false)]
     root: Vec<String>,
-    #[clap(long, about = "dir names which you want to force re-generate", required = false)]
+    #[clap(
+        long,
+        about = "dir names which you want to force re-generate",
+        required = false
+    )]
     force: Vec<String>,
     #[clap(subcommand)]
     subcmd: Option<SubCmd>,
@@ -37,11 +41,9 @@ async fn main() -> Result<()> {
                 dantalian(&root, &force).await?;
             }
             Ok(())
-        },
-        Some(subcmd) => {
-            match subcmd {
-                SubCmd::Bgm(sub_opts) => bgm_cmd(sub_opts).await,
-            }
+        }
+        Some(subcmd) => match subcmd {
+            SubCmd::Bgm(sub_opts) => bgm_cmd(sub_opts).await,
         },
     }
 }
@@ -104,4 +106,3 @@ async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
         }
     }
 }
-
