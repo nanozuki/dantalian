@@ -1,0 +1,2 @@
+subject_id = 325285
+episode_re = "^.*\\[(?P<ep>\\d\\d)\\].*\\.mp4$"

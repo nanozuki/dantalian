@@ -14,7 +14,7 @@ pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let path = format!(
-        "/search/subject/{}?type=2&chii_searchDateLine={}",
+        "/search/subject/{}?type=2&responseGroup=large&chii_searchDateLine={}",
         encoded_keyword, ts,
     );
     trace!("request url {}", path);
@@ -74,9 +74,10 @@ pub struct EpisodeResponse {
 impl fmt::Display for EpisodeResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = f.width().unwrap_or(0);
-        let strings: Vec<String> = self.eps
+        let strings: Vec<String> = self
+            .eps
             .iter()
-            .map(|ep| format!("{:>width$}", ep, width=width))
+            .map(|ep| format!("{:>width$}", ep, width = width))
             .collect();
         write!(f, "{}", strings.join("\n"))
     }

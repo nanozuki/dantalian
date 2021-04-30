@@ -1,6 +1,6 @@
 use super::config::Config;
+use super::utils::is_video_file;
 use anyhow::{anyhow, Result};
-use std::ffi::OsStr;
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 
@@ -44,13 +44,8 @@ impl Job {
         config: &Config,
         force: bool,
     ) -> Result<Option<EpisodeJob>> {
-        // if this file don't have extension or this is nfo file, skip it.
-        let skip = file_entry
-            .path()
-            .extension()
-            .and_then(OsStr::to_str)
-            .map_or(true, |ext| ext == "nfo");
-        if skip {
+        if !is_video_file(file_entry.path()) {
+            // if this file is not video file, skip it.
             return Ok(None);
         }
         let file_name = match file_entry.file_name().to_str() {
@@ -64,7 +59,9 @@ impl Job {
         }
         let caps = config.episode_re.captures(file_name);
         let ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
-            Some(ep_match) => String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0')),
+            Some(ep_match) => {
+                String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0'))
+            }
             None => return Ok(None),
         };
         let sp = caps

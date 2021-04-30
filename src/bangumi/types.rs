@@ -1,7 +1,7 @@
+use crate::logger::indent_display;
 use serde::Deserialize;
 use serde_repr::Deserialize_repr;
 use std::fmt;
-use crate::logger::indent_display;
 
 #[derive(Deserialize_repr, Debug)]
 #[repr(u32)]
@@ -82,6 +82,7 @@ impl fmt::Display for SubjectBase {
         let strings = vec![
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}  Subject ID: {}", prefix, self.id),
+            format!("{}  Air Date: {}", prefix, self.air_date),
             format!("{}  URL: {}", prefix, self.url),
         ];
         write!(f, "{}", strings.join("\n"))
@@ -127,8 +128,9 @@ impl fmt::Display for SubjectMedium {
         let strings = vec![
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}* {}", prefix, self.url),
-            format!("{}* crts: {}", prefix, crts),
-            format!("{}* staff: {}", prefix, staff),
+            format!("{}* Air Date: {}", prefix, self.air_date),
+            format!("{}* Characters: {}", prefix, crts),
+            format!("{}* Staff: {}", prefix, staff),
             format!("{}* {}", prefix, self.summary),
         ];
         write!(f, "{}", strings.join("\n"))
