@@ -1,16 +1,14 @@
 use super::types::{Episode, SubjectBase, SubjectMedium};
-use crate::bangumi::EpisodeStatus;
 use anyhow::{Context, Result};
 use hyper::{Client, Uri};
 use hyper_tls::HttpsConnector;
-use log::{debug, info, trace};
+use log::{debug, trace};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
 use std::fmt;
 use std::time::SystemTime;
 
-pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
-    info!("search anime '{}':", keyword);
+pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
     let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
     let ts = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)?
@@ -20,17 +18,11 @@ pub async fn search_anime(keyword: &str) -> Result<Vec<SubjectBase>> {
         encoded_keyword, ts,
     );
     trace!("request url {}", path);
-    let res_obj: SearchResponse = request(&path)
+    let res: SearchResponse = request(&path)
         .await
         .with_context(|| "request search anime")?;
-    debug!("obj: {:?}", &res_obj);
-    info!("found {} result(s):\n", &res_obj.results);
-    for item in res_obj.list.iter() {
-        info!("    * {} / {}", item.name, item.name_cn);
-        info!("      Subject ID: {}", item.id);
-        info!("      URL: {}", item.url);
-    }
-    Ok(res_obj.list)
+    debug!("obj: {:?}", &res);
+    Ok(res)
 }
 
 pub struct BgmAnime {
@@ -40,7 +32,7 @@ pub struct BgmAnime {
 
 pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
     let subject = get_subject_info(id).await?;
-    let episodes = get_subject_episodes(id).await?;
+    let episodes = get_subject_episodes(id).await?.eps;
     Ok(BgmAnime { subject, episodes })
 }
 
@@ -50,11 +42,10 @@ pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
         .await
         .with_context(|| format!("request get subject: {}", id))?;
     debug!("subject: {:#?}", &subject);
-    info!("{}", &subject);
     Ok(subject)
 }
 
-pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
+pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {
     trace!("get_subject_info: {}", id);
     let path = format!("/subject/{}/ep", id);
     let res: EpisodeResponse = request(&path)
@@ -63,16 +54,15 @@ pub async fn get_subject_episodes(id: u32) -> Result<Vec<Episode>> {
     for ep in &res.eps {
         debug!("subject ep: {:#?}", &ep);
     }
-    info!("{}", &res);
-    Ok(res.eps)
+    Ok(res)
 }
 
 const BASE_URL: &str = "https://api.bgm.tv";
 
 #[derive(Deserialize, Debug)]
-struct SearchResponse {
-    results: u32,
-    list: Vec<SubjectBase>,
+pub struct SearchResponse {
+    pub results: u32,
+    pub list: Vec<SubjectBase>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -83,14 +73,12 @@ pub struct EpisodeResponse {
 
 impl fmt::Display for EpisodeResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for ep in self.eps.iter().filter(|ep| ep.status != EpisodeStatus::NA) {
-            writeln!(
-                f,
-                "{} {}\t{} / {}",
-                ep.episode_type, ep.sort, ep.name, ep.name_cn
-            )?;
-        }
-        Ok(())
+        let width = f.width().unwrap_or(0);
+        let strings: Vec<String> = self.eps
+            .iter()
+            .map(|ep| format!("{:>width$}", ep, width=width))
+            .collect();
+        write!(f, "{}", strings.join("\n"))
     }
 }
 

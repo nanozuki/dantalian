@@ -28,13 +28,18 @@ impl log::Log for Logger {
     fn flush(&self) {}
 }
 
-const INDENTS: &str = "\t\t\t\t\t\t";
-const MAX_INDENTS: u8 = 6;
+const INDENTS: &str = "                        "; // 24 spaces
+const INDENTS_WIDTH: usize = 2;
 
-pub fn indent(i: u8) -> String {
-    if i > MAX_INDENTS {
-        String::from(INDENTS)
-    } else {
-        String::from(&INDENTS[..i as usize])
+pub fn indent(i: usize) -> &'static str {
+    &INDENTS[..std::cmp::min(i*INDENTS_WIDTH, (&INDENTS).len())]
+}
+
+pub fn indent_display(f: &std::fmt::Formatter<'_>) -> &'static str {
+    if let Some(align) = f.align() {
+        if let std::fmt::Alignment::Right = align {
+            return indent(f.width().unwrap_or(1))
+        }
     }
+    return "";
 }

@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use serde_repr::Deserialize_repr;
 use std::fmt;
+use crate::logger::indent_display;
 
 #[derive(Deserialize_repr, Debug)]
 #[repr(u32)]
@@ -75,6 +76,18 @@ pub struct SubjectBase {
     pub images: SubjectImage,
 }
 
+impl fmt::Display for SubjectBase {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let prefix = indent_display(f);
+        let strings = vec![
+            format!("{}* {} / {}", prefix, self.name, self.name_cn),
+            format!("{}  Subject ID: {}", prefix, self.id),
+            format!("{}  URL: {}", prefix, self.url),
+        ];
+        write!(f, "{}", strings.join("\n"))
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct SubjectMedium {
     pub id: u32,
@@ -98,8 +111,7 @@ pub struct SubjectMedium {
 
 impl fmt::Display for SubjectMedium {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "* {} / {}", self.name, self.name_cn)?;
-        writeln!(f, "* {}", self.url)?;
+        let prefix = indent_display(f);
         let crts: String = self
             .crt
             .iter()
@@ -112,10 +124,14 @@ impl fmt::Display for SubjectMedium {
             .map(|s| s.name.as_str())
             .collect::<Vec<&str>>()
             .join("/");
-        writeln!(f, "* crts: {}", crts)?;
-        writeln!(f, "* staff: {}", staff)?;
-        write!(f, "* {}", self.summary)?;
-        Ok(())
+        let strings = vec![
+            format!("{}* {} / {}", prefix, self.name, self.name_cn),
+            format!("{}* {}", prefix, self.url),
+            format!("{}* crts: {}", prefix, crts),
+            format!("{}* staff: {}", prefix, staff),
+            format!("{}* {}", prefix, self.summary),
+        ];
+        write!(f, "{}", strings.join("\n"))
     }
 }
 
@@ -208,4 +224,16 @@ pub struct Episode {
     pub comment: u32,
     pub desc: String,
     pub status: EpisodeStatus,
+}
+
+impl fmt::Display for Episode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let prefix = indent_display(f);
+        let idx = format!("{:>3}{:02}", self.episode_type, self.sort);
+        if let EpisodeStatus::NA = self.status {
+            write!(f, "{}{:>6}: Not Aired", prefix, idx)
+        } else {
+            write!(f, "{}{:>6}: {} / {}", prefix, idx, self.name, self.name_cn)
+        }
+    }
 }

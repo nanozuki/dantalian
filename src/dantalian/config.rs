@@ -60,7 +60,7 @@ impl Config {
         let anime_name = cap_anime_name(dirname);
         match anime_name {
             Some(name) => {
-                let subjects = search_anime(&name).await?;
+                let subjects = search_anime(&name).await?.list;
                 if subjects.is_empty() {
                     bail!("not found");
                 }

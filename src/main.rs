@@ -3,7 +3,7 @@ use clap::{crate_authors, crate_description, crate_version, Clap};
 use dantalian::bangumi;
 use dantalian::dantalian::dantalian;
 use dantalian::logger::Logger;
-use log::set_logger;
+use log::{info, set_logger};
 use std::collections::HashSet;
 
 #[derive(Clap)]
@@ -93,15 +93,21 @@ async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
     match opts.subcmd {
         BgmSubCmd::Search(search_opts) => {
             let keyword = &search_opts.keyword.join(" ");
-            let _ = bangumi::search_anime(keyword).await?;
+            let res = bangumi::search_anime(keyword).await?;
+            info!("found {} result(s):\n", &res.results);
+            for item in res.list.iter() {
+                info!("{:>1}", item);
+            }
             Ok(())
         }
         BgmSubCmd::Get(get_opts) => {
-            let _ = bangumi::get_subject_info(get_opts.id).await?;
+            let subject = bangumi::get_subject_info(get_opts.id).await?;
+            info!("{}", &subject);
             Ok(())
         }
         BgmSubCmd::GetEp(get_opts) => {
-            let _ = bangumi::get_subject_episodes(get_opts.id).await?;
+            let res = bangumi::get_subject_episodes(get_opts.id).await?;
+            info!("{}", &res);
             Ok(())
         }
     }
