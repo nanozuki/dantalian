@@ -95,7 +95,7 @@ fn cap_anime_name(dir_name: &str) -> Option<String> {
 
 fn default_ep_regex(name_qry: &str) -> Result<Regex> {
     Ok(Regex::new(&format!(
-        r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[_\d]+)\.",
+        r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[.\d]+)\.",
         name_qry
     ))?)
 }

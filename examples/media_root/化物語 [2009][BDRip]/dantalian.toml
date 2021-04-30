@@ -1,2 +1,0 @@
-subject_id = 1671
-episode_re = "^(?P<name>化物語) (?P<sp>SP)?(?P<ep>[_\\d]+)\\."
