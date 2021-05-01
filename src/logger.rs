@@ -36,10 +36,9 @@ pub fn indent(i: usize) -> &'static str {
 }
 
 pub fn indent_display(f: &std::fmt::Formatter<'_>) -> &'static str {
-    if let Some(align) = f.align() {
-        if let std::fmt::Alignment::Right = align {
-            return indent(f.width().unwrap_or(1));
-        }
+    if let Some(std::fmt::Alignment::Right) = f.align() {
+        indent(f.width().unwrap_or(1))
+    } else {
+        ""
     }
-    return "";
 }
