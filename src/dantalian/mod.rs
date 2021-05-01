@@ -41,12 +41,16 @@ async fn handle_dir(path: &Path, force: bool) -> Result<()> {
         info!("{}No file should be generate, skip.", indent(3));
         return Ok(());
     }
-    let bgm_data = get_anime_data(job.subject_id).await.with_context(|| "get_anime_data")?;
-    info!("{}Fetch anime data for: [{}] {} / {}",
-          indent(3),
-          &bgm_data.subject.id,
-          &bgm_data.subject.name,
-          &bgm_data.subject.name_cn);
+    let bgm_data = get_anime_data(job.subject_id)
+        .await
+        .with_context(|| "get_anime_data")?;
+    info!(
+        "{}Fetch anime data for: [{}] {} / {}",
+        indent(3),
+        &bgm_data.subject.id,
+        &bgm_data.subject.name,
+        &bgm_data.subject.name_cn
+    );
     let anime_data = AnimeData::from(bgm_data);
     let generator = Generator::new();
     if job.should_gen_tvshow {

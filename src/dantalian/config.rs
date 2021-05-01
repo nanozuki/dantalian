@@ -1,13 +1,13 @@
 use crate::bangumi::{get_subject_info, search_anime};
+use crate::logger::indent;
 use anyhow::{anyhow, bail, Result};
 use lazy_static::lazy_static;
+use log::info;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use log::info;
-use crate::logger::indent;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct ConfigFile {
