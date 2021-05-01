@@ -1,8 +1,8 @@
 use crate::bangumi::{get_subject_info, search_anime};
 use crate::logger::indent;
 use anyhow::{anyhow, bail, Result};
-use lazy_static::lazy_static;
 use log::info;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -88,11 +88,12 @@ impl Config {
     }
 }
 
+static DEFAULT_DIR_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^(?P<name>.+?)(?P<tags> (\[[^\s]+\])+)?$").unwrap());
+
 fn cap_anime_name(dir_name: &str) -> Option<String> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^(?P<name>.+?)(?P<tags> (\[[^\s]+\])+)?$").unwrap();
-    }
-    RE.captures(dir_name)
+    DEFAULT_DIR_RE
+        .captures(dir_name)
         .and_then(|cap| cap.name("name"))
         .map(|mat| String::from(mat.as_str()))
 }

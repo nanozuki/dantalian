@@ -119,7 +119,6 @@ dependencies = [
  "futures",
  "hyper",
  "hyper-tls",
- "lazy_static",
  "log",
  "once_cell",
  "percent-encoding",
