@@ -10,9 +10,8 @@ episodes not published in TV into Season 00, including all SPs and OVAs. It is n
 has multiple OVAs or SPs series, especially the ["Monogatari (series)"](https://www.themoviedb.org/tv/46195/season/0).
 [AniDB](https://anidb.net/) put episodes in the right place, but It only has English Infos.
 
-So, Dantalian uses bangumi as animes source to generate nfo files. In media center software like Jellyfin or Kodi, nfo
-files have higher priority than scrapers. As bangumi is not design for anime media files database, some of the data has
-lacked.
+So, Dantalian uses bangumi as anime source to generate nfo files. In media center software like Jellyfin or Kodi, nfo
+files have higher priority than scrapers. As bangumi is not design for anime media file database, some data has lacked.
 
 In general, this thing has the following peculiarity:
 
@@ -28,23 +27,23 @@ In general, this thing has the following peculiarity:
 ```
 <media_root>/
 ├── ひぐらしのなく頃に 業
-│   ├── tvshow.nfo
-│   ├── ひぐらしのなく頃に 業 01.mp4
-│   ├── ひぐらしのなく頃に 業 01.nfo
-│   ├── ひぐらしのなく頃に 業 02.mp4
-│   ├── ひぐらしのなく頃に 業 02.nfo
-│   ├── ひぐらしのなく頃に 業 03.mp4
-│   ├── ひぐらしのなく頃に 業 03.nfo
-│   ├── ひぐらしのなく頃に 業 04.mp4
-│   └── ひぐらしのなく頃に 業 04.nfo
+│   ├── tvshow.nfo
+│   ├── ひぐらしのなく頃に 業 01.mp4
+│   ├── ひぐらしのなく頃に 業 01.nfo
+│   ├── ひぐらしのなく頃に 業 02.mp4
+│   ├── ひぐらしのなく頃に 業 02.nfo
+│   ├── ひぐらしのなく頃に 業 03.mp4
+│   ├── ひぐらしのなく頃に 業 03.nfo
+│   ├── ひぐらしのなく頃に 業 04.mp4
+│   └── ひぐらしのなく頃に 業 04.nfo
 ├── 化物語 [2009][BDRip]
-│   ├── tvshow.nfo
-│   ├── 化物語 01.mp4
-│   ├── 化物語 01.nfo
-│   ├── 化物語 02.mp4
-│   ├── 化物語 02.nfo
-│   ├── 化物語 SP5_5.mp4
-│   └── 化物語 SP5_5.nfo
+│   ├── tvshow.nfo
+│   ├── 化物語 01.mp4
+│   ├── 化物語 01.nfo
+│   ├── 化物語 02.mp4
+│   ├── 化物語 02.nfo
+│   ├── 化物語 SP5.5.mp4
+│   └── 化物語 SP5.5.nfo
 └── 进击的巨人 最终季
     ├── tvshow.nfo
     ├── 进击的巨人 最终季 60.mp4

@@ -1,6 +1,8 @@
 use super::{Episode, TVShow, EPISODE_TEMPLATE, TVSHOW_TEMPLATE};
 use anyhow::{Context, Result};
 use tinytemplate::TinyTemplate;
+// use log::{debug, info};
+use log::debug;
 
 pub struct Generator<'a> {
     tt: TinyTemplate<'a>,
@@ -22,7 +24,7 @@ impl<'a> Generator<'a> {
             .tt
             .render("tvshow", show)
             .with_context(|| "render tvshow")?;
-        println!("generated tvshow nfo file:\n{}", &rendered);
+        debug!("generated tvshow nfo file:\n{}", &rendered);
         Ok(rendered)
     }
 
@@ -31,7 +33,7 @@ impl<'a> Generator<'a> {
             .tt
             .render("episode", episode)
             .with_context(|| "render episode")?;
-        println!("generated episode nfo file:\n{}", &rendered);
+        debug!("generated episode nfo file:\n{}", &rendered);
         Ok(rendered)
     }
 }

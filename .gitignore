@@ -16,3 +16,4 @@
 
 # run example
 examples/media_root/**/*.nfo
+examples/media_root/**/*.toml
