@@ -2,8 +2,8 @@ use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use dantalian::bangumi;
 use dantalian::dantalian::dantalian;
-use dantalian::logger::Logger;
-use log::{info, set_logger};
+use dantalian::{info, logger::Logger};
+use log::set_logger;
 use std::collections::HashSet;
 
 #[derive(Clap)]

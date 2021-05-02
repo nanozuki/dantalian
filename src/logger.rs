@@ -42,3 +42,53 @@ pub fn indent_display(f: &std::fmt::Formatter<'_>) -> &'static str {
         ""
     }
 }
+
+#[macro_export]
+macro_rules! info {
+    (ind: $ind:expr, $($arg:tt)+) => {
+        log::info!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+    };
+    ($($arg:tt)+) => {
+        log::info!($($arg)+);
+    }
+}
+
+#[macro_export]
+macro_rules! error {
+    (ind: $ind:expr, $($arg:tt)+) => {
+        log::error!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+    };
+    ($($arg:tt)+) => {
+        log::error!($($arg)+);
+    }
+}
+
+#[macro_export]
+macro_rules! debug {
+    (ind: $ind:expr, $($arg:tt)+) => {
+        log::debug!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+    };
+    ($($arg:tt)+) => {
+        log::debug!($($arg)+);
+    }
+}
+
+#[macro_export]
+macro_rules! trace {
+    (ind: $ind:expr, $($arg:tt)+) => {
+        log::trace!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+    };
+    ($($arg:tt)+) => {
+        log::trace!($($arg)+);
+    }
+}
+
+#[macro_export]
+macro_rules! warn {
+    (ind: $ind:expr, $($arg:tt)+) => {
+        log::warn!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+    };
+    ($($arg:tt)+) => {
+        log::warn!($($arg)+);
+    }
+}

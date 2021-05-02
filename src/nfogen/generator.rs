@@ -1,8 +1,7 @@
 use super::{Episode, TVShow, EPISODE_TEMPLATE, TVSHOW_TEMPLATE};
+use crate::debug;
 use anyhow::{Context, Result};
 use tinytemplate::TinyTemplate;
-// use log::{debug, info};
-use log::debug;
 
 pub struct Generator<'a> {
     tt: TinyTemplate<'a>,
