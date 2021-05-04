@@ -95,6 +95,10 @@ a `--force` option to the command. Both the `--root` and `--force` option are re
 dantalian gen --root <path1> --root <path2> --force 化物语
 ```
 
+## Download / Installed
+
+See [wiki page](https://github.com/nanozuki/dantalian/wiki/Download)
+
 ## Roadmap
 
 - [ ] Anime Movie / "theater edition"
