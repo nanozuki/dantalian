@@ -1,7 +1,6 @@
 use crate::bangumi::{get_subject_info, search_anime};
-use crate::logger::indent;
+use crate::info;
 use anyhow::{anyhow, bail, Result};
-use log::info;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -35,7 +34,7 @@ impl Config {
     }
 
     async fn parse_from_file(filepath: &Path) -> Result<Config> {
-        info!("{}Parse config file", indent(2));
+        info!(ind: 2, "Parse config file");
         let file = std::fs::read_to_string(filepath)?;
         let cf: ConfigFile = toml::from_str(file.as_ref())?;
         match cf.episode_re {
@@ -55,7 +54,7 @@ impl Config {
     }
 
     async fn parse_from_dirname(path: &Path) -> Result<Config> {
-        info!("{}Not found config file, create one", indent(2));
+        info!(ind: 2, "Not found config file, create one");
         let dirname = path
             .file_name()
             .ok_or_else(|| anyhow!("invalid path"))?
