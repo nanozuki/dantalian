@@ -1,27 +1,13 @@
 use anyhow::Result;
-use clap::{crate_authors, crate_description, crate_version, Clap};
+use clap::Clap;
 use dantalian::bangumi;
 use dantalian::dantalian::dantalian;
 use dantalian::{info, logger::Logger};
 use log::set_logger;
+use options::*;
 use std::collections::HashSet;
 
-#[derive(Clap)]
-#[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
-struct Opts {
-    #[clap(short, long, about = "enable verbose")]
-    verbose: bool,
-    #[clap(long, about = "path root of anime media files", required = false)]
-    root: Vec<String>,
-    #[clap(
-        long,
-        about = "dir names which you want to force re-generate",
-        required = false
-    )]
-    force: Vec<String>,
-    #[clap(subcommand)]
-    subcmd: Option<SubCmd>,
-}
+mod options;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -45,47 +31,6 @@ async fn main() -> Result<()> {
             SubCmd::Bgm(sub_opts) => bgm_cmd(sub_opts).await,
         },
     }
-}
-
-#[derive(Clap)]
-enum SubCmd {
-    #[clap()]
-    Bgm(BgmCmd),
-}
-
-#[derive(Clap)]
-#[clap(about = "cli tools for bangumi apis")]
-struct BgmCmd {
-    #[clap(subcommand)]
-    subcmd: BgmSubCmd,
-}
-
-#[derive(Clap)]
-enum BgmSubCmd {
-    Search(BgmSearchOpt),
-    Get(BgmGetSubjectOpt),
-    GetEp(BgmGetSubjectEpsOpt),
-}
-
-#[derive(Clap)]
-#[clap(about = "search keyword")]
-struct BgmSearchOpt {
-    #[clap(about = "search keyword")]
-    keyword: Vec<String>,
-}
-
-#[derive(Clap)]
-#[clap(about = "get subject")]
-struct BgmGetSubjectOpt {
-    #[clap(about = "subject id")]
-    id: u32,
-}
-
-#[derive(Clap)]
-#[clap(about = "get subject episodes")]
-struct BgmGetSubjectEpsOpt {
-    #[clap(about = "subject id")]
-    id: u32,
 }
 
 async fn bgm_cmd(opts: BgmCmd) -> Result<()> {

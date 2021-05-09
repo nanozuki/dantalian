@@ -26,3 +26,7 @@ regex = "1.4.3"
 toml = "0.5"
 log = "0.4"
 once_cell = "*"
+
+[build-dependencies]
+clap = "3.0.0-beta.2"
+clap_generate = "3.0.0-beta.2"
