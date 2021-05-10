@@ -1,7 +1,7 @@
 use clap::IntoApp;
 use clap_generate::{
     generate_to,
-    generators::{Bash, Zsh},
+    generators::{Bash, Fish, Zsh},
 };
 include!("src/options.rs");
 
@@ -19,6 +19,11 @@ fn main() {
         &outdir,     // We need to specify where to write to
     );
     generate_to::<Bash, _, _>(
+        &mut app,    // We need to specify what generator to use
+        "dantalian", // We need to specify the bin name manually
+        &outdir,     // We need to specify where to write to
+    );
+    generate_to::<Fish, _, _>(
         &mut app,    // We need to specify what generator to use
         "dantalian", // We need to specify the bin name manually
         &outdir,     // We need to specify where to write to
