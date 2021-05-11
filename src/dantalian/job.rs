@@ -21,7 +21,7 @@ const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
 impl Job {
     pub fn parse(dir: &Path, config: &Config, force: bool) -> Result<Job> {
         let tv_show_file = dir.join(TVSHOW_NFO_NAME);
-        let should_gen_tvshow = force || tv_show_file.exists();
+        let should_gen_tvshow = force || !tv_show_file.exists();
         let mut episodes: Vec<EpisodeJob> = vec![];
         for e in WalkDir::new(dir).min_depth(1).max_depth(1) {
             let entry = e?;

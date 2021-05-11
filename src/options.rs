@@ -5,8 +5,8 @@ use clap::{crate_authors, crate_description, crate_version, Clap};
 pub struct Opts {
     #[clap(short, long, about = "enable verbose")]
     pub verbose: bool,
-    #[clap(long, about = "path root of anime media files", required = false)]
-    pub root: Vec<String>,
+    #[clap(short, long, about = "source folders", required = false)]
+    pub source: Vec<String>,
     #[clap(
         long,
         about = "dir names which you want to force re-generate",
