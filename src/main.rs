@@ -4,7 +4,7 @@ use dantalian::bangumi;
 use dantalian::dantalian::dantalian;
 use dantalian::{info, logger::Logger};
 use log::set_logger;
-use options::*;
+use options::{BgmCmd, BgmSubCmd, Opts, SubCmd};
 use std::collections::HashSet;
 
 mod options;
