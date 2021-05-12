@@ -15,5 +15,7 @@
 .DS_Store
 
 # run example
-examples/media_root/**/*.nfo
-examples/media_root/**/*.toml
+!examples/source/小魔女学园 [2017][TV]/dantalian.toml
+!examples/source/[dantalian][202104][奇巧计程车ODD TAXI][01-13合集][BDRip][1080p]/dantalian.toml
+examples/source/**/*.nfo
+examples/source/**/*.toml

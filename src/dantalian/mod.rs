@@ -17,9 +17,9 @@ mod data;
 mod job;
 mod utils;
 
-pub async fn dantalian(media_root: &str, forces: &HashSet<String>) -> Result<()> {
-    info!("Run dantalian for {}", media_root);
-    for e in WalkDir::new(media_root).min_depth(1).max_depth(1) {
+pub async fn dantalian(source: &str, forces: &HashSet<String>) -> Result<()> {
+    info!("Run dantalian for {}", source);
+    for e in WalkDir::new(source).min_depth(1).max_depth(1) {
         let entry = e?;
         if entry.file_type().is_dir() {
             let path = path_str(entry.path())?;

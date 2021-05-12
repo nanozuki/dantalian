@@ -22,8 +22,8 @@ async fn main() -> Result<()> {
             for f in opts.force {
                 force.insert(f);
             }
-            for root in opts.root {
-                dantalian(&root, &force).await?;
+            for source in opts.source {
+                dantalian(&source, &force).await?;
             }
             Ok(())
         }
