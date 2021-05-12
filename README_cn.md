@@ -18,6 +18,10 @@ dantalian 生成的数据有以下特点：
 * 缺少分类和标签，缺少单集演员和staff名单。这部分将使用全剧的数据代替
 * 缺少单集封面，将有媒体中心自行抓取
 
+## 下载
+
+参见 wiki 中的 [Download](https://github.com/nanozuki/dantalian/wiki/Download).
+
 ## 文件结构
 
 ### 源文件夹/Souce Folder

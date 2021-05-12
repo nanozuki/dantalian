@@ -22,6 +22,10 @@ In general, this thing has the following peculiarity:
 (Dantalian will use the whole series info as an alternative).
 * Lack of a poster of a single episode. The media center software will capture it.
 
+## Download
+
+See [Download](https://github.com/nanozuki/dantalian/wiki/Download) in our wiki.
+
 ## File structure
 
 ### Source folder
