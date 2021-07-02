@@ -56,7 +56,7 @@ macro_rules! info {
 #[macro_export]
 macro_rules! error {
     (ind: $ind:expr, $($arg:tt)+) => {
-        log::error!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+        log::error!("{}{}", $crate::logger::indent($ind), colored::Colorize::red(&*format!($($arg)+)));
     };
     ($($arg:tt)+) => {
         log::error!($($arg)+);
@@ -86,7 +86,7 @@ macro_rules! trace {
 #[macro_export]
 macro_rules! warn {
     (ind: $ind:expr, $($arg:tt)+) => {
-        log::warn!("{}{}", $crate::logger::indent($ind), format!($($arg)+));
+        log::warn!("{}{}", $crate::logger::indent($ind), colored::Colorize::yellow(&*format!($($arg)+)));
     };
     ($($arg:tt)+) => {
         log::warn!($($arg)+);
