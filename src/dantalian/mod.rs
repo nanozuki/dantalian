@@ -1,6 +1,6 @@
 use crate::bangumi::get_anime_data;
-use crate::info;
 use crate::nfogen::{Generator, TVSHOW_NFO_NAME};
+use crate::{error, info};
 use anyhow::{anyhow, Context, Result};
 use config::Config;
 use data::AnimeData;
@@ -26,7 +26,7 @@ pub async fn dantalian(source: &str, forces: &HashSet<String>) -> Result<()> {
             info!(ind: 1, "Check {} ...", path);
             match handle_dir(entry.path(), forces.contains(path)).await {
                 Ok(_) => info!(ind: 2, "Completed!"),
-                Err(e) => info!(ind: 2, "Failed: {}", e),
+                Err(e) => error!(ind: 2, "Failed: {}", e),
             };
         }
     }

@@ -1,1 +1,2 @@
 subject_id = 185792
+episode_re = "^(?P<name>リトルウィッチアカデミア|小魔女学园) (?P<sp>SP)?(?P<ep>[.\\d]+)\\."
