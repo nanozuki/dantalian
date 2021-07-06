@@ -230,7 +230,7 @@ pub struct Episode {
 
 impl Episode {
     pub fn is_empty(&self) -> bool {
-        return self.status == EpisodeStatus::NA && self.name == "" && self.name_cn == ""
+        self.status == EpisodeStatus::NA && self.name.is_empty() && self.name_cn.is_empty()
     }
 }
 
