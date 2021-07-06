@@ -1,4 +1,4 @@
-use crate::bangumi::{BgmAnime, EpisodeStatus, EpisodeType};
+use crate::bangumi::{BgmAnime, EpisodeType};
 use crate::nfogen::{Actor, Episode, TVShow};
 use std::rc::Rc;
 
@@ -84,7 +84,7 @@ impl From<BgmAnime> for AnimeData {
         let rc_credits = Rc::from(credits);
 
         for be in bgm_data.episodes {
-            if be.status != EpisodeStatus::NA {
+            if !be.is_empty() {
                 let is_sp = be.episode_type == EpisodeType::Sp;
                 data.tvshow.has_sp = data.tvshow.has_sp || is_sp;
                 data.episodes.push(Episode {

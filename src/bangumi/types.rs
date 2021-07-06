@@ -228,14 +228,16 @@ pub struct Episode {
     pub status: EpisodeStatus,
 }
 
+impl Episode {
+    pub fn is_empty(&self) -> bool {
+        self.status == EpisodeStatus::NA && self.name.is_empty() && self.name_cn.is_empty()
+    }
+}
+
 impl fmt::Display for Episode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = indent_display(f);
         let idx = format!("{:>3}{:02}", self.episode_type, self.sort);
-        if let EpisodeStatus::NA = self.status {
-            write!(f, "{}{:>6}: Not Aired", prefix, idx)
-        } else {
-            write!(f, "{}{:>6}: {} / {}", prefix, idx, self.name, self.name_cn)
-        }
+        write!(f, "{}{:>6}: {} / {}", prefix, idx, self.name, self.name_cn)
     }
 }
