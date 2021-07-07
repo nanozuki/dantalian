@@ -1,4 +1,5 @@
 use clap::{crate_authors, crate_description, crate_version, Clap};
+use std::path::PathBuf;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
@@ -6,7 +7,7 @@ pub struct Opts {
     #[clap(short, long, about = "enable verbose")]
     pub verbose: bool,
     #[clap(short, long, about = "source folders", required = false)]
-    pub source: Vec<String>,
+    pub source: Vec<PathBuf>,
     #[clap(
         long,
         about = "dir names which you want to force re-generate",
