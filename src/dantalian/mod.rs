@@ -8,7 +8,7 @@ use job::Job;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use utils::path_str;
 use walkdir::WalkDir;
 
