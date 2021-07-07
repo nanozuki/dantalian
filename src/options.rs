@@ -1,4 +1,5 @@
 use clap::{crate_authors, crate_description, crate_version, Clap};
+use std::path::PathBuf;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
@@ -21,6 +22,8 @@ pub struct Opts {
 pub enum SubCmd {
     #[clap()]
     Bgm(BgmCmd),
+    #[clap()]
+    GenConfig(GenConfigCmd),
 }
 
 #[derive(Clap)]
@@ -56,4 +59,13 @@ pub struct BgmGetSubjectOpt {
 pub struct BgmGetSubjectEpsOpt {
     #[clap(about = "subject id")]
     pub id: u32,
+}
+
+#[derive(Clap)]
+#[clap(about = "generate subject config")]
+pub struct GenConfigCmd {
+    #[clap(about = "search keyword")]
+    pub keyword: Vec<String>,
+    #[clap(short, long, about = "anime path")]
+    pub path: PathBuf,
 }

@@ -76,6 +76,12 @@ impl Config {
         }
     }
 
+    pub(crate) fn save_to_dir(&self, dir: &Path) -> Result<()> {
+        let filepath = dir.join(DIR_CONFIG_NAME);
+        self.save(filepath.as_path())?;
+        Ok(())
+    }
+
     fn save(&self, filepath: &Path) -> Result<()> {
         let file_content = toml::to_string(&ConfigFile {
             subject_id: self.subject_id,
@@ -97,7 +103,7 @@ fn cap_anime_name(dir_name: &str) -> Option<String> {
         .map(|mat| String::from(mat.as_str()))
 }
 
-fn default_ep_regex(name_qry: &str) -> Result<Regex> {
+pub(super) fn default_ep_regex(name_qry: &str) -> Result<Regex> {
     Ok(Regex::new(&format!(
         r"^(?P<name>{}) (?P<sp>SP)?(?P<ep>[.\d]+)\.",
         name_qry

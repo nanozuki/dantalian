@@ -1,10 +1,9 @@
 use anyhow::Result;
 use clap::Clap;
-use dantalian::bangumi;
-use dantalian::dantalian::dantalian;
-use dantalian::{info, logger::Logger};
+use dantalian::dantalian::{dantalian, generate_config};
+use dantalian::{bangumi, info, logger::Logger};
 use log::set_logger;
-use options::{BgmCmd, BgmSubCmd, Opts, SubCmd};
+use options::{BgmCmd, BgmSubCmd, GenConfigCmd, Opts, SubCmd};
 use std::collections::HashSet;
 
 mod options;
@@ -29,6 +28,10 @@ async fn main() -> Result<()> {
         }
         Some(subcmd) => match subcmd {
             SubCmd::Bgm(sub_opts) => bgm_cmd(sub_opts).await,
+            SubCmd::GenConfig(gen_opts) => {
+                let GenConfigCmd { keyword, path } = gen_opts;
+                generate_config(keyword, &path).await
+            }
         },
     }
 }
@@ -39,9 +42,6 @@ async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
             let keyword = &search_opts.keyword.join(" ");
             let res = bangumi::search_anime(keyword).await?;
             info!("found {} result(s):\n", &res.results);
-            for item in res.list.iter() {
-                info!("{:>1}", item);
-            }
             Ok(())
         }
         BgmSubCmd::Get(get_opts) => {
