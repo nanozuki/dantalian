@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use clap::{crate_authors, crate_description, crate_version, Clap};
+use std::path::PathBuf;
 
 #[derive(Clap)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]

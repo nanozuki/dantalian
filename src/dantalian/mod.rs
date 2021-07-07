@@ -17,7 +17,7 @@ mod data;
 mod job;
 mod utils;
 
-pub async fn dantalian(source: &PathBuf, forces: &HashSet<String>) -> Result<()> {
+pub async fn dantalian(source: &Path, forces: &HashSet<String>) -> Result<()> {
     info!("Run dantalian for {}", source.to_string_lossy());
     for e in WalkDir::new(source).min_depth(1).max_depth(1) {
         let entry = e?;
