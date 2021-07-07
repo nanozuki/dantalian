@@ -66,6 +66,6 @@ pub struct BgmGetSubjectEpsOpt {
 pub struct GenConfigCmd {
     #[clap(about = "search keyword")]
     pub keyword: Vec<String>,
-    #[clap(short, long, about = "anime path")]
+    #[clap(short, long, about = "anime dir path")]
     pub path: PathBuf,
 }

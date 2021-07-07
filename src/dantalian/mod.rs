@@ -74,7 +74,7 @@ pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
     let keyword = keywords.concat();
     let res = search_anime(&keyword).await?;
     if res.list.len() > 15 {
-        error!("found too many results! please try again with more clear keyword");
+        error!(ind: 2, "found too many results! please try again with more clear keyword");
         return Ok(());
     }
     for (ind, item) in res.list.iter().enumerate() {
@@ -85,6 +85,7 @@ pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
         info!("{:>1}", item_with_num);
     }
     let mut buf = String::new();
+    println!("\n  choose the one is right:");
     std::io::stdin().read_line(&mut buf)?;
     if let Ok(num) = buf.trim().parse::<usize>() {
         if let Some(item) = res.list.get(num) {
@@ -97,6 +98,6 @@ pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
             return Ok(());
         }
     }
-    error!("not a valid number!");
+    error!(ind: 2, "not a valid number!");
     Ok(())
 }
