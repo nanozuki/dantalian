@@ -1,13 +1,8 @@
-use anyhow::{anyhow, Result};
 use once_cell::sync::Lazy;
 use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::sync::Mutex;
-
-pub fn path_str(path: &Path) -> Result<&str> {
-    path.to_str().ok_or_else(|| anyhow!("path is not valid"))
-}
 
 // VIDEO_EXTS is collected from: https://en.wikipedia.org/wiki/Video_file_format
 static VIDEO_EXTS: Lazy<Mutex<HashSet<&'static str>>> = Lazy::new(|| {
