@@ -17,14 +17,14 @@ mod data;
 mod job;
 mod utils;
 
-pub async fn dantalian(source: &Path, forces: &HashSet<String>) -> Result<()> {
+pub async fn dantalian(source: &Path, forces: &HashSet<String>, force_all: bool) -> Result<()> {
     info!("Run dantalian for {}", source.to_string_lossy());
     for e in WalkDir::new(source).min_depth(1).max_depth(1) {
         let entry = e?;
         if entry.file_type().is_dir() {
             let path = path_str(entry.path())?;
             info!(ind: 1, "Check {} ...", path);
-            match handle_dir(entry.path(), forces.contains(path)).await {
+            match handle_dir(entry.path(), force_all || forces.contains(path)).await {
                 Ok(_) => info!(ind: 2, "Completed!"),
                 Err(e) => error!(ind: 2, "Failed: {}", e),
             };
