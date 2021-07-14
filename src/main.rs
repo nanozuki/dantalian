@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
                 if force.contains(&path) {
                     return true;
                 }
-                return false;
+                false
             };
             for source in opts.source {
                 dantalian(&source, is_force).await?;
