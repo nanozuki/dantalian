@@ -21,15 +21,7 @@ async fn main() -> Result<()> {
         None => {
             let force: HashSet<String> = HashSet::from_iter(opts.force);
             let force_all = opts.force_all;
-            let is_force = |path| {
-                if force_all {
-                    return true;
-                }
-                if force.contains(&path) {
-                    return true;
-                }
-                false
-            };
+            let is_force = |path| force_all || force.contains(&path);
             for source in opts.source {
                 dantalian(&source, is_force).await?;
             }
