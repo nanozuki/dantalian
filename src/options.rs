@@ -14,6 +14,8 @@ pub struct Opts {
         required = false
     )]
     pub force: Vec<String>,
+    #[clap(long, about = "force re-generate all anime")]
+    pub force_all: bool,
     #[clap(subcommand)]
     pub subcmd: Option<SubCmd>,
 }
