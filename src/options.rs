@@ -1,4 +1,4 @@
-use clap::{crate_authors, crate_description, crate_version, Clap};
+use clap::{crate_authors, crate_description, crate_version, Clap, ValueHint};
 use std::path::PathBuf;
 
 #[derive(Clap)]
@@ -6,7 +6,7 @@ use std::path::PathBuf;
 pub struct Opts {
     #[clap(short, long, about = "enable verbose")]
     pub verbose: bool,
-    #[clap(short, long, about = "source folders", required = false)]
+    #[clap(short, long, about = "source folders", required = false, value_hint=ValueHint::DirPath)]
     pub source: Vec<PathBuf>,
     #[clap(
         long,
