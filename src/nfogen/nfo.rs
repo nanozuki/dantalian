@@ -14,7 +14,7 @@ pub struct TVShow {
     pub rating_value: f64,
     pub rating_votes: u32,
     pub has_sp: bool,
-    pub eps_count: u32,
+    pub eps_count: Option<u32>,
     pub plot: String,
     pub poster: String,
     pub genres: Vec<String>,
@@ -44,7 +44,7 @@ pub const TVSHOW_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8" standa
         </rating>
     </ratings>
     <season>{{ if has_sp }}2{{ else }}1{{ endif }}</season>
-    <episode>{eps_count}</episode>
+    {{ if eps_count }}<episode>{eps_count}</episode>{{ endif }}
     <plot>{plot}</plot>
     <thumb aspect="poster" preview="{poster}">{poster}</thumb>
     <uniqueid type="bangumi" default="true">{uid}</uniqueid>{{ for g in genres }}
