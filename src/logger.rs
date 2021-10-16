@@ -32,7 +32,7 @@ const INDENTS: &str = "                        "; // 24 spaces
 const INDENTS_WIDTH: usize = 2;
 
 pub fn indent(i: usize) -> &'static str {
-    &INDENTS[..std::cmp::min(i * INDENTS_WIDTH, (&INDENTS).len())]
+    &INDENTS[..std::cmp::min(i * INDENTS_WIDTH, INDENTS.len())]
 }
 
 pub fn indent_display(f: &std::fmt::Formatter<'_>) -> &'static str {
