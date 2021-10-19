@@ -13,7 +13,7 @@ fn main() {
     };
     let mut app = Opts::into_app();
     app.set_bin_name("dantalian");
-    generate_to::<Zsh, _, _>(&mut app, "dantalian", &outdir);
-    generate_to::<Bash, _, _>(&mut app, "dantalian", &outdir);
-    generate_to::<Fish, _, _>(&mut app, "dantalian", &outdir);
+    generate_to(Zsh, &mut app, "dantalian", &outdir).expect("zsh completion generation failed.");
+    generate_to(Bash, &mut app, "dantalian", &outdir).expect("bash completion generation failed.");
+    generate_to(Fish, &mut app, "dantalian", &outdir).expect("fish completion genertaion failed.");
 }

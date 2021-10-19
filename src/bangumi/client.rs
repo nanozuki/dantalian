@@ -9,7 +9,7 @@ use std::fmt;
 use std::time::SystemTime;
 
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
-    let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
+    let encoded_keyword = utf8_percent_encode(keyword, NON_ALPHANUMERIC);
     let ts = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
