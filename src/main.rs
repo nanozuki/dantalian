@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::Clap;
+use clap::Parser;
 use dantalian::bangumi;
 use dantalian::dantalian::dantalian;
 use dantalian::{info, logger::Logger};

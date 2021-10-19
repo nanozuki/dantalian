@@ -1,7 +1,7 @@
-use clap::{crate_authors, crate_description, crate_version, Clap, ValueHint};
+use clap::{crate_authors, crate_description, crate_version, Parser, ValueHint};
 use std::path::PathBuf;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
 pub struct Opts {
     #[clap(short, long, about = "enable verbose")]
@@ -20,41 +20,41 @@ pub struct Opts {
     pub subcmd: Option<SubCmd>,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 pub enum SubCmd {
     #[clap()]
     Bgm(BgmCmd),
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(about = "cli tools for bangumi apis")]
 pub struct BgmCmd {
     #[clap(subcommand)]
     pub subcmd: BgmSubCmd,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 pub enum BgmSubCmd {
     Search(BgmSearchOpt),
     Get(BgmGetSubjectOpt),
     GetEp(BgmGetSubjectEpsOpt),
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(about = "search keyword")]
 pub struct BgmSearchOpt {
     #[clap(about = "search keyword")]
     pub keyword: Vec<String>,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(about = "get subject")]
 pub struct BgmGetSubjectOpt {
     #[clap(about = "subject id")]
     pub id: u32,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(about = "get subject episodes")]
 pub struct BgmGetSubjectEpsOpt {
     #[clap(about = "subject id")]
