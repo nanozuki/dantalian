@@ -1,6 +1,8 @@
 use serde::Serialize;
 use std::rc::Rc;
 
+use crate::bangumi::SubjectMedium;
+
 pub const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
 
 // TVShow file is for overall show informaion.
@@ -112,4 +114,93 @@ pub const EPISODE_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8" stand
         <thumb>{a.thumb}</thumb>
     </actor>{{ endfor }}
 </episodedetails>
+"#;
+
+pub const MOVIE_NFO_NAME: &str = "movie.nfo";
+
+#[derive(Serialize, Debug)]
+pub struct Movie {
+    pub uid: u32,
+    pub title: String,
+    pub original_title: String,
+    pub rating_value: f64,
+    pub rating_votes: u32,
+    pub plot: String,
+    pub poster: String,
+    pub genres: Vec<String>,
+    pub tags: Vec<String>,
+    pub premiered: String,
+    pub status: Option<String>,
+    pub studio: Option<String>,
+    pub actors: Vec<Actor>,
+}
+
+impl From<SubjectMedium> for Movie {
+    fn from(subject: SubjectMedium) -> Self {
+        let mut actors: Vec<Actor> = Vec::new();
+        for crt in subject.crt.iter() {
+            match &crt.actors {
+                Some(crt_actors) => {
+                    for a in crt_actors.iter() {
+                        actors.push(Actor {
+                            name: String::from(&crt.name_cn),
+                            role: String::from(&a.name),
+                            order: actors.len() as u32,
+                            thumb: String::from(&crt.images.large),
+                        });
+                    }
+                }
+                None => {
+                    actors.push(Actor {
+                        name: String::from(&crt.name_cn),
+                        role: String::from("N/A"),
+                        order: actors.len() as u32,
+                        thumb: String::from(&crt.images.large),
+                    });
+                }
+            }
+        }
+        Self {
+            uid: subject.id,
+            title: subject.name_cn,
+            original_title: subject.name,
+            rating_value: subject.rating.score,
+            rating_votes: subject.rating.total,
+            plot: subject.summary,
+            poster: subject.images.large,
+            genres: vec![],
+            tags: vec![],
+            premiered: subject.air_date,
+            status: None,
+            studio: None,
+            actors,
+        }
+    }
+}
+
+pub const MOVIE_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<movie>
+    <title>{title}</title>
+    <originaltitle>{original_title}</originaltitle>
+    <ratings>
+        <rating name="bangumi" max="10" default="true">
+            <value>{rating_value}</value>
+            <votes>{rating_votes}</votes>
+        </rating>
+    </ratings>
+    <plot>{plot}</plot>
+    <thumb aspect="poster" preview="{poster}">{poster}</thumb>
+    <uniqueid type="bangumi" default="true">{uid}</uniqueid>{{ for g in genres }}
+    <genre>{g}</genre>{{ endfor }}{{ for t in tags }}
+    <tag>{t}</tag>{{ endfor }}
+    <premiered>{premiered}</premiered>{{ if status }}
+    <status>{status}</status>{{ endif }}{{ if studio }}
+    <studio>{studio}</studio>{{ endif }}{{ for a in actors }}
+    <actor>
+        <name>{a.name}</name>
+        <role>{a.role}</role>
+        <order>{a.order}</order>
+        <thumb>{a.thumb}</thumb>
+    </actor>{{ endfor }}
+</movie>
 "#;

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 use dantalian::bangumi;
-use dantalian::dantalian::dantalian;
+use dantalian::dantalian::{dantalian, dantalian_movie};
 use dantalian::{info, logger::Logger};
 use log::set_logger;
 use options::{BgmCmd, BgmSubCmd, Opts, SubCmd};
@@ -23,7 +23,10 @@ async fn main() -> Result<()> {
             let force_all = opts.force_all;
             let is_force = |path| force_all || force.contains(&path);
             for source in opts.source {
-                dantalian(&source, is_force).await?;
+                dantalian(&source, &is_force).await?;
+            }
+            for movie_source in opts.movie_source {
+                dantalian_movie(&movie_source, &is_force).await?;
             }
             Ok(())
         }

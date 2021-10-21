@@ -5,6 +5,7 @@ use anyhow::{anyhow, Context, Result};
 use config::Config;
 use data::AnimeData;
 use job::Job;
+pub use movie::dantalian_movie;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -13,9 +14,10 @@ use walkdir::WalkDir;
 mod config;
 mod data;
 mod job;
+mod movie;
 mod utils;
 
-pub async fn dantalian<F: FnMut(String) -> bool>(source: &Path, mut is_force: F) -> Result<()> {
+pub async fn dantalian<F: Fn(String) -> bool>(source: &Path, is_force: &F) -> Result<()> {
     info!("Run dantalian for {}", source.to_string_lossy());
     for e in WalkDir::new(source).min_depth(1).max_depth(1) {
         let entry = e?;
