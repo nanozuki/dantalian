@@ -1,2 +1,0 @@
-subject_id = 29883
-episode_re = "^(?P<name>シン・エヴァンゲリオン劇場版:│▌) (?P<sp>SP)?(?P<ep>[.\\d]+)\\."
