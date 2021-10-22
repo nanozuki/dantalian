@@ -4,19 +4,20 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[clap(author=crate_authors!(), version=crate_version!(), about=crate_description!())]
 pub struct Opts {
-    #[clap(short, long, about = "enable verbose")]
+    /// show more information
+    #[clap(short, long)]
     pub verbose: bool,
-    #[clap(short, long, about = "source folders", required = false, value_hint=ValueHint::DirPath)]
+    /// anime source folder. can be used multiple times to decide multi source
+    #[clap(short, long, required = false, value_hint=ValueHint::DirPath)]
     pub source: Vec<PathBuf>,
-    #[clap(short, long, about = "source folders", required = false, value_hint=ValueHint::DirPath)]
+    /// movies source folder. can be used multiple times to decide multi source
+    #[clap(short, long, required = false, value_hint=ValueHint::DirPath)]
     pub movie_source: Vec<PathBuf>,
-    #[clap(
-        long,
-        about = "dir names which you want to force re-generate",
-        required = false
-    )]
+    /// pathes which you want to force re-generate
+    #[clap(long, required = false)]
     pub force: Vec<String>,
-    #[clap(long, about = "force re-generate all anime")]
+    /// force re-generate all nfo files for all anime
+    #[clap(long)]
     pub force_all: bool,
     #[clap(subcommand)]
     pub subcmd: Option<SubCmd>,
@@ -24,12 +25,11 @@ pub struct Opts {
 
 #[derive(Parser)]
 pub enum SubCmd {
-    #[clap()]
     Bgm(BgmCmd),
 }
 
+/// cli tools to play with bangumi apis
 #[derive(Parser)]
-#[clap(about = "cli tools for bangumi apis")]
 pub struct BgmCmd {
     #[clap(subcommand)]
     pub subcmd: BgmSubCmd,
@@ -37,27 +37,27 @@ pub struct BgmCmd {
 
 #[derive(Parser)]
 pub enum BgmSubCmd {
+    /// search subject in bangumi
     Search(BgmSearchOpt),
+    /// try get subject info by id
     Get(BgmGetSubjectOpt),
+    /// try get episode info by subject id
     GetEp(BgmGetSubjectEpsOpt),
 }
 
 #[derive(Parser)]
-#[clap(about = "search keyword")]
 pub struct BgmSearchOpt {
     #[clap(about = "search keyword")]
     pub keyword: Vec<String>,
 }
 
 #[derive(Parser)]
-#[clap(about = "get subject")]
 pub struct BgmGetSubjectOpt {
     #[clap(about = "subject id")]
     pub id: u32,
 }
 
 #[derive(Parser)]
-#[clap(about = "get subject episodes")]
 pub struct BgmGetSubjectEpsOpt {
     #[clap(about = "subject id")]
     pub id: u32,
