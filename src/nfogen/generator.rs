@@ -1,4 +1,7 @@
-use super::{Episode, TVShow, EPISODE_TEMPLATE, TVSHOW_TEMPLATE};
+use super::{
+    nfo::{Movie, MOVIE_TEMPLATE},
+    Episode, TVShow, EPISODE_TEMPLATE, TVSHOW_TEMPLATE,
+};
 use crate::debug;
 use anyhow::{Context, Result};
 use tinytemplate::TinyTemplate;
@@ -13,9 +16,19 @@ impl<'a> Generator<'a> {
         let mut g = Generator {
             tt: TinyTemplate::new(),
         };
+        g.tt.add_template("movie", MOVIE_TEMPLATE).unwrap();
         g.tt.add_template("tvshow", TVSHOW_TEMPLATE).unwrap();
         g.tt.add_template("episode", EPISODE_TEMPLATE).unwrap();
         g
+    }
+
+    pub fn gen_movie_nfo(&self, movie: &Movie) -> Result<String> {
+        let rendered = self
+            .tt
+            .render("movie", movie)
+            .with_context(|| "render movie")?;
+        debug!("generated movie nfo file:\n{}", &rendered);
+        Ok(rendered)
     }
 
     pub fn gen_tvshow_nfo(&self, show: &TVShow) -> Result<String> {

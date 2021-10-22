@@ -1,0 +1,2 @@
+subject_id = 244761
+episode_re = "^(?P<name>劇場版 SHIROBAKO) (?P<sp>SP)?(?P<ep>[.\\d]+)\\."

@@ -8,6 +8,8 @@ pub struct Opts {
     pub verbose: bool,
     #[clap(short, long, about = "source folders", required = false, value_hint=ValueHint::DirPath)]
     pub source: Vec<PathBuf>,
+    #[clap(short, long, about = "source folders", required = false, value_hint=ValueHint::DirPath)]
+    pub movie_source: Vec<PathBuf>,
     #[clap(
         long,
         about = "dir names which you want to force re-generate",
