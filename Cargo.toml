@@ -2,7 +2,7 @@
 name = "dantalian"
 version = "0.4.0"
 authors = ["Nanozuki Crows <nanozuki.crows@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "A nfo file generator for your anime. Source from https://bangumi.tv/."
 license = "GPL-3.0-or-later"
 repository = "https://github.com/nanozuki/dantalian/"
