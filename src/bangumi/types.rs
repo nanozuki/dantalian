@@ -104,7 +104,7 @@ pub struct SubjectMedium {
     pub eps: Option<u32>,
     pub eps_count: Option<u32>,
     pub rating: SubjectRating,
-    pub rank: u32,
+    pub rank: Option<u32>,
     pub collection: SubjectCollection,
     pub crt: Vec<Character>,
     pub staff: Vec<Staff>,

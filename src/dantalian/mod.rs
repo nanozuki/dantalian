@@ -26,7 +26,7 @@ pub async fn dantalian<F: Fn(String) -> bool>(source: &Path, is_force: &F) -> Re
             info!(ind: 1, "Check {} ...", path);
             match handle_dir(entry.path(), is_force(path)).await {
                 Ok(_) => info!(ind: 2, "Completed!"),
-                Err(e) => error!(ind: 2, "Failed: {}", e),
+                Err(e) => error!(ind: 2, "Failed: {}\n{}", e, e.root_cause()),
             };
         }
     }
