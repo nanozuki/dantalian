@@ -18,7 +18,7 @@ pub struct TVShow {
     pub has_sp: bool,
     pub eps_count: Option<u32>,
     pub plot: String,
-    pub poster: String,
+    pub poster: Option<String>,
     pub genres: Vec<String>,
     pub tags: Vec<String>,
     pub premiered: String,
@@ -48,7 +48,7 @@ pub const TVSHOW_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8" standa
     <season>{{ if has_sp }}2{{ else }}1{{ endif }}</season>
     {{ if eps_count }}<episode>{eps_count}</episode>{{ endif }}
     <plot>{plot}</plot>
-    <thumb aspect="poster" preview="{poster}">{poster}</thumb>
+    {{ if poster }}<thumb aspect="poster" preview="{poster}">{poster}</thumb>{{ endif }}
     <uniqueid type="bangumi" default="true">{uid}</uniqueid>{{ for g in genres }}
     <genre>{g}</genre>{{ endfor }}{{ for t in tags }}
     <tag>{t}</tag>{{ endfor }}
@@ -126,7 +126,7 @@ pub struct Movie {
     pub rating_value: f64,
     pub rating_votes: u32,
     pub plot: String,
-    pub poster: String,
+    pub poster: Option<String>,
     pub genres: Vec<String>,
     pub tags: Vec<String>,
     pub premiered: String,
@@ -167,7 +167,7 @@ impl From<SubjectMedium> for Movie {
             rating_value: subject.rating.score,
             rating_votes: subject.rating.total,
             plot: subject.summary,
-            poster: subject.images.large,
+            poster: subject.images.map(|img| img.large),
             genres: vec![],
             tags: vec![],
             premiered: subject.air_date,
@@ -189,7 +189,7 @@ pub const MOVIE_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8" standal
         </rating>
     </ratings>
     <plot>{plot}</plot>
-    <thumb aspect="poster" preview="{poster}">{poster}</thumb>
+    {{ if poster }}<thumb aspect="poster" preview="{poster}">{poster}</thumb>{{ endif }}
     <uniqueid type="bangumi" default="true">{uid}</uniqueid>{{ for g in genres }}
     <genre>{g}</genre>{{ endfor }}{{ for t in tags }}
     <tag>{t}</tag>{{ endfor }}

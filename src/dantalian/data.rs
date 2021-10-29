@@ -33,7 +33,7 @@ impl From<BgmAnime> for AnimeData {
                 has_sp: false,
                 eps_count: bgm_data.subject.eps_count,
                 plot: bgm_data.subject.summary,
-                poster: bgm_data.subject.images.large,
+                poster: bgm_data.subject.images.map(|img| img.large),
                 genres: vec![],
                 tags: vec![],
                 premiered: bgm_data.subject.air_date,
