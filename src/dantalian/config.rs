@@ -1,6 +1,7 @@
 use crate::bangumi::{get_subject_info, search_anime};
 use crate::info;
 use anyhow::{anyhow, bail, Result};
+use mustache;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -12,12 +13,14 @@ use std::path::Path;
 struct ConfigFile {
     subject_id: u32,
     episode_re: Option<String>,
+    episode: Option<String>,
 }
 
 #[derive(Debug)]
 pub struct Config {
     pub subject_id: u32,
-    pub episode_re: Regex,
+    pub episode_re: Option<Regex>,
+    pub episode: Option<mustache::Template>,
 }
 
 const DIR_CONFIG_NAME: &str = "dantalian.toml";
@@ -37,17 +40,29 @@ impl Config {
         info!(ind: 2, "Parse config file");
         let file = std::fs::read_to_string(filepath)?;
         let cf: ConfigFile = toml::from_str(file.as_ref())?;
-        match cf.episode_re {
-            Some(re) => Ok(Config {
+        match (cf.episode, cf.episode_re) {
+            (Some(tmpl), Some(_)) => Ok(Config {
+                subject_id: cf.subject_id,
+                episode_re: None,
+                episode: Some(mustache::compile_str(&tmpl)?),
+            }),
+            (Some(tmpl), None) => Ok(Config {
+                subject_id: cf.subject_id,
+                episode_re: None,
+                episode: Some(mustache::compile_str(&tmpl)?),
+            }),
+            (None, Some(re)) => Ok(Config {
                 subject_id: cf.subject_id,
                 episode_re: Regex::new(&re)?,
+                episode: None,
             }),
-            None => {
+            (None, None) => {
                 let subject = get_subject_info(cf.subject_id).await?;
                 let name_qry = format!("{}|{}", subject.name, subject.name_cn);
                 Ok(Config {
                     subject_id: cf.subject_id,
                     episode_re: default_ep_regex(&name_qry)?,
+                    episode: None,
                 })
             }
         }
@@ -69,7 +84,8 @@ impl Config {
                 }
                 Ok(Config {
                     subject_id: subjects[0].id,
-                    episode_re: default_ep_regex(&name)?,
+                    episode_re: Some(default_ep_regex(&name))?,
+                    episode: None,
                 })
             }
             None => bail!("invalid name"),
