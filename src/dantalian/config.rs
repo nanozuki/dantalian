@@ -1,5 +1,5 @@
 use crate::bangumi::{get_subject_info, search_anime};
-use crate::info;
+use crate::{info, warn};
 use anyhow::{anyhow, bail, Result};
 use mustache;
 use once_cell::sync::Lazy;
@@ -40,6 +40,9 @@ impl Config {
         info!(ind: 2, "Parse config file");
         let file = std::fs::read_to_string(filepath)?;
         let cf: ConfigFile = toml::from_str(file.as_ref())?;
+        if cf.episode_re.is_some() {
+            warn!(ind: 2, "Regular expression for episode is deprecated, consider using template string")
+        }
         match (cf.episode, cf.episode_re) {
             (Some(tmpl), Some(_)) => Ok(Config {
                 subject_id: cf.subject_id,
@@ -53,7 +56,7 @@ impl Config {
             }),
             (None, Some(re)) => Ok(Config {
                 subject_id: cf.subject_id,
-                episode_re: Regex::new(&re)?,
+                episode_re: Some(Regex::new(&re)?),
                 episode: None,
             }),
             (None, None) => {
@@ -61,7 +64,7 @@ impl Config {
                 let name_qry = format!("{}|{}", subject.name, subject.name_cn);
                 Ok(Config {
                     subject_id: cf.subject_id,
-                    episode_re: default_ep_regex(&name_qry)?,
+                    episode_re: Some(default_ep_regex(&name_qry)?),
                     episode: None,
                 })
             }
@@ -84,7 +87,7 @@ impl Config {
                 }
                 Ok(Config {
                     subject_id: subjects[0].id,
-                    episode_re: Some(default_ep_regex(&name))?,
+                    episode_re: Some(default_ep_regex(&name)?),
                     episode: None,
                 })
             }
@@ -93,10 +96,19 @@ impl Config {
     }
 
     fn save(&self, filepath: &Path) -> Result<()> {
-        let file_content = toml::to_string(&ConfigFile {
+        let config_file = ConfigFile{
             subject_id: self.subject_id,
-            episode_re: Some(self.episode_re.to_string()),
-        })?;
+            episode: None,
+            episode_re: None,
+        };
+        if let Some(tmp) = self.episode {
+            let tmp_str: String = tmp.into()
+            config_file.episode = Some(tmp_str)
+        }
+        if let Some(re) = self.episode_re {
+            config_file.episode_re = Some(re.to_string())
+        }
+        let file_content = toml::to_string(&config_file)?;
         let mut f = File::create(filepath)?;
         f.write_all(&file_content.into_bytes())?;
         Ok(())
