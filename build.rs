@@ -1,7 +1,7 @@
 use clap::IntoApp;
-use clap_generate::{
+use clap_complete::{
     generate_to,
-    generators::{Bash, Fish, Zsh},
+    shells::{Bash, Fish, Zsh},
 };
 include!("src/options.rs");
 
