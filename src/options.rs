@@ -47,18 +47,18 @@ pub enum BgmSubCmd {
 
 #[derive(Parser)]
 pub struct BgmSearchOpt {
-    #[clap(about = "search keyword")]
+    #[clap(help = "search keyword")]
     pub keyword: Vec<String>,
 }
 
 #[derive(Parser)]
 pub struct BgmGetSubjectOpt {
-    #[clap(about = "subject id")]
+    #[clap(help = "subject id")]
     pub id: u32,
 }
 
 #[derive(Parser)]
 pub struct BgmGetSubjectEpsOpt {
-    #[clap(about = "subject id")]
+    #[clap(help = "subject id")]
     pub id: u32,
 }
