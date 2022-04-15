@@ -11,7 +11,7 @@ fn main() {
         None => return,
         Some(outdir) => outdir,
     };
-    let mut app = Opts::into_app();
+    let mut app = Opts::command();
     app.set_bin_name("dantalian");
     generate_to(Zsh, &mut app, "dantalian", &outdir).expect("zsh completion generation failed.");
     generate_to(Bash, &mut app, "dantalian", &outdir).expect("bash completion generation failed.");
