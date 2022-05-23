@@ -1,6 +1,6 @@
 use super::types::{Episode, SubjectBase, SubjectMedium};
 use anyhow::{Context, Result};
-use hyper::{Client, Uri};
+use hyper::{Body, Client, Request, Uri};
 use hyper_tls::HttpsConnector;
 use log::{debug, trace};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
@@ -90,7 +90,13 @@ async fn request<T: DeserializeOwned>(path: &str) -> Result<T> {
         .parse()
         .with_context(|| "parse url")?;
     debug!("url = {}", &url);
-    let res = client.get(url).await.with_context(|| "get request")?;
+    let req = Request::get(url)
+        .header(
+            "User-Agent",
+            format!("Dantalian/{}", env!("CARGO_PKG_VERSION")),
+        )
+        .body(Body::default())?;
+    let res = client.request(req).await.with_context(|| "get request")?;
     debug!("status: {}", res.status());
     let buf = hyper::body::to_bytes(res)
         .await
