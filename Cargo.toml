@@ -1,6 +1,6 @@
 [package]
 name = "dantalian"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Nanozuki Crows <nanozuki.crows@gmail.com>"]
 edition = "2021"
 description = "A nfo file generator for your anime. Source from https://bangumi.tv/."
