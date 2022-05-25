@@ -116,6 +116,11 @@ jobs:
         rustup default
         cargo -V
         rustc -V
+    - uses: awalsh128/cache-apt-pkgs-action@v1
+      if: contains( matrix.job.target, 'musl' )
+      with:
+        packages: musl-tools
+        version: 1.0
     - name: Build
       uses: actions-rs/cargo@v1
       with:
