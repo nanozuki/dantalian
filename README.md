@@ -152,7 +152,7 @@ the folder `./examples/source/[dantalian][202104][奇巧计程车ODD TAXI][01-13
 [dantalian][202104][奇巧计程车ODD TAXI][02][BDRip][1080p].mp4
 ```
 
-You can use these configs to define the name pattern: (subject_id is requiered)
+You can use these configs to define the name pattern: (subject_id is required)
 
 ```toml
 subject_id = 325285

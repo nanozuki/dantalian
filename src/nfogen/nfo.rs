@@ -5,8 +5,8 @@ use crate::bangumi::SubjectMedium;
 
 pub const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
 
-// TVShow file is for overall show informaion.
-// TVShow file name must actully be tvshow.nfo.
+// TVShow file is for overall show information.
+// TVShow file name must actually be tvshow.nfo.
 // This file must be tv show's folder's root.
 #[derive(Serialize, Debug)]
 pub struct TVShow {

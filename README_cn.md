@@ -24,7 +24,7 @@ dantalian 生成的数据有以下特点：
 
 ## 文件结构
 
-### 源文件夹/Souce Folder
+### 源文件夹/Source Folder
 
 Dantalian 遵循 Kodi 媒体文件的组织方式和 nfo 文件的 schema 及存放方式，分为媒体库的源文件夹和动画作品的文件夹。
 源文件夹的详细说明请查阅 [Source folder](https://kodi.wiki/view/Source_folder)。

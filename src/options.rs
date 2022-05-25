@@ -13,7 +13,7 @@ pub struct Opts {
     /// movies source folder. can be used multiple times to decide multi source
     #[clap(short, long, required = false, value_hint=ValueHint::DirPath)]
     pub movie_source: Vec<PathBuf>,
-    /// pathes which you want to force re-generate
+    /// paths which you want to force re-generate
     #[clap(long, required = false)]
     pub force: Vec<String>,
     /// force re-generate all nfo files for all anime
