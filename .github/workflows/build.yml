@@ -12,11 +12,10 @@ jobs:
       matrix:
         job:
           # { os, target, cargo-options, features, use-cross, toolchain }
-          - { os: ubuntu-18.04   , target: x86_64-unknown-linux-gnu    }
+          - { os: ubuntu-22.04   , target: x86_64-unknown-linux-gnu    }
+          - { os: ubuntu-22.04   , target: x86_64-unknown-linux-musl  , features: vendored  }
           - { os: macos-latest   , target: x86_64-apple-darwin         }
-          - { os: windows-latest , target: i686-pc-windows-gnu         }
           - { os: windows-latest , target: i686-pc-windows-msvc        }
-          - { os: windows-latest , target: x86_64-pc-windows-gnu       } ## !maint: [rivy; 2020-01-21] may break due to rust bug; follow possible solution from GH:rust-lang/rust#47048 (refs: GH:rust-lang/rust#47048 , GH:rust-lang/rust#53454 , GH:bike-barn/hermit#172 )
           - { os: windows-latest , target: x86_64-pc-windows-msvc      }
     steps:
     - uses: actions/checkout@v1
@@ -26,8 +25,6 @@ jobs:
       run: |
         # toolchain
         TOOLCHAIN="stable" ## default to "stable" toolchain
-        # * specify alternate TOOLCHAIN for *-pc-windows-gnu targets; gnu targets on Windows are broken for the standard *-pc-windows-msvc toolchain (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
-        case ${{ matrix.job.target }} in *-pc-windows-gnu) TOOLCHAIN="stable-${{ matrix.job.target }}" ;; esac;
         # * use requested TOOLCHAIN if specified
         if [ -n "${{ matrix.job.toolchain }}" ]; then TOOLCHAIN="${{ matrix.job.toolchain }}" ; fi
         echo set-output name=TOOLCHAIN::${TOOLCHAIN}
@@ -109,7 +106,7 @@ jobs:
         toolchain: ${{ steps.vars.outputs.TOOLCHAIN }}
         target: ${{ matrix.job.target }}
         override: true
-        profile: minimal # minimal component installation (ie, no documentation)
+        profile: minimal
     - name: Info
       shell: bash
       run: |
@@ -119,6 +116,11 @@ jobs:
         rustup default
         cargo -V
         rustc -V
+    - uses: awalsh128/cache-apt-pkgs-action@v1
+      if: contains( matrix.job.target, 'musl' )
+      with:
+        packages: musl-tools
+        version: 1.0
     - name: Build
       uses: actions-rs/cargo@v1
       with:
@@ -149,85 +151,6 @@ jobs:
           *-pc-windows-*) 7z -y a '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* | tail -2 ;;
           *) tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* ;;
         esac;
-        popd >/dev/null
-    - name: Publish
-      uses: softprops/action-gh-release@v1
-      if: steps.vars.outputs.DEPLOY
-      with:
-        files: |
-          ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_NAME }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  musl:
-    name: Musl Build
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v1
-    - name: Initialize workflow variables
-      id: vars
-      shell: bash
-      run: |
-        # staging directory
-        STAGING='_staging'
-        echo set-output name=STAGING::${STAGING}
-        echo ::set-output name=STAGING::${STAGING}
-        # parse commit reference info
-        REF_NAME=${GITHUB_REF#refs/*/}
-        unset REF_BRANCH ; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/} ;; esac;
-        unset REF_TAG ; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/} ;; esac;
-        REF_SHAS=${GITHUB_SHA:0:8}
-        echo set-output name=REF_NAME::${REF_NAME}
-        echo set-output name=REF_BRANCH::${REF_BRANCH}
-        echo set-output name=REF_TAG::${REF_TAG}
-        echo set-output name=REF_SHAS::${REF_SHAS}
-        echo ::set-output name=REF_NAME::${REF_NAME}
-        echo ::set-output name=REF_BRANCH::${REF_BRANCH}
-        echo ::set-output name=REF_TAG::${REF_TAG}
-        echo ::set-output name=REF_SHAS::${REF_SHAS}
-        # parse target
-        TARGET_ARCH=x86_84
-        echo set-output name=TARGET_ARCH::${TARGET_ARCH}
-        echo ::set-output name=TARGET_ARCH::${TARGET_ARCH}
-        TARGET_OS=linux
-        echo set-output name=TARGET_OS::${TARGET_OS}
-        echo ::set-output name=TARGET_OS::${TARGET_OS}
-        # package name
-        PKG_suffix=".tar.gz"
-        PKG_BASENAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-x86_64-unknown-linux-musl
-        PKG_NAME=${PKG_BASENAME}${PKG_suffix}
-        echo set-output name=PKG_suffix::${PKG_suffix}
-        echo set-output name=PKG_BASENAME::${PKG_BASENAME}
-        echo set-output name=PKG_NAME::${PKG_NAME}
-        echo ::set-output name=PKG_suffix::${PKG_suffix}
-        echo ::set-output name=PKG_BASENAME::${PKG_BASENAME}
-        echo ::set-output name=PKG_NAME::${PKG_NAME}
-        # deployable tag? (ie, leading "vM" or "M"; M == version number)
-        unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY='true' ; fi
-        echo set-output name=DEPLOY::${DEPLOY:-<empty>/false}
-        echo ::set-output name=DEPLOY::${DEPLOY}
-    - name: Create all needed build/work directories
-      shell: bash
-      run: |
-        mkdir -p '${{ steps.vars.outputs.STAGING }}'
-        mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}'
-    - name: Musl Build 
-      uses: gmiam/rust-musl-action@master
-      with:
-        args: cargo build --target x86_64-unknown-linux-musl --release
-    - name: Archive executable artifacts
-      uses: actions/upload-artifact@master
-      with:
-        name: ${{ env.PROJECT_NAME }}-x86_64-unknown-linux-musl
-        path: target/x86_64-unknown-linux-musl/release/${{ env.PROJECT_NAME }}
-    - name: Package
-      shell: bash
-      run: |
-        # binary
-        cp 'target/x86_64-unknown-linux-musl/release/${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
-        # base compressed package
-        pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
-        tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/*
         popd >/dev/null
     - name: Publish
       uses: softprops/action-gh-release@v1
