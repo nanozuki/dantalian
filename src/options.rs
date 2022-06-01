@@ -7,6 +7,19 @@ pub struct Opts {
     /// show more information
     #[clap(short, long)]
     pub verbose: bool,
+    #[clap(subcommand)]
+    pub subcmd: SubCmd,
+}
+
+#[derive(Parser)]
+pub enum SubCmd {
+    Gen(GenCmd),
+    Bgm(BgmCmd),
+}
+
+/// Generate nfo files use bangumi data
+#[derive(Parser)]
+pub struct GenCmd {
     /// anime source folder. can be used multiple times to decide multi source
     #[clap(short, long, required = false, value_hint=ValueHint::DirPath)]
     pub source: Vec<PathBuf>,
@@ -19,13 +32,6 @@ pub struct Opts {
     /// force re-generate all nfo files for all anime
     #[clap(long)]
     pub force_all: bool,
-    #[clap(subcommand)]
-    pub subcmd: Option<SubCmd>,
-}
-
-#[derive(Parser)]
-pub enum SubCmd {
-    Bgm(BgmCmd),
 }
 
 /// cli tools to play with bangumi apis
