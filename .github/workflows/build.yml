@@ -95,6 +95,11 @@ jobs:
         STRIP="strip" ; case ${{ matrix.job.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
+        # native-inputs
+        MUSL_TOOLS=""
+        case ${{ matrix.job.target }} in *-musl) MUSL_TOOLS="musl-tools" ;; esac;
+        echo set-output name=MUSL_TOOLS::${MUSL_TOOLS}
+        echo ::set-output name=MUSL_TOOLS::${MUSL_TOOLS}
     - name: Create all needed build/work directories
       shell: bash
       run: |
@@ -117,10 +122,10 @@ jobs:
         cargo -V
         rustc -V
     - uses: awalsh128/cache-apt-pkgs-action@v1
-      if: contains( matrix.job.target, 'musl' )
+      if: contains( matrix.job.target, 'linux' )
       with:
-        packages: musl-tools
-        version: 1.0
+        packages: libclang-dev libgtk-3-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libspeechd-dev libxkbcommon-dev libssl-dev ${{ steps.vars.outputs.MUSL_TOOLS }}
+        version: linux-${{ steps.vars.outputs.MUSL_TOOLS }}-1
     - name: Build
       uses: actions-rs/cargo@v1
       with:
@@ -138,13 +143,22 @@ jobs:
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.job.target }}
         path: target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
+    - name: Archive executable artifacts gui
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.job.target }}-gui
+        path: target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}-gui${{ steps.vars.outputs.EXE_suffix }}
     - name: Package
       shell: bash
       run: |
         # binary
         cp 'target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        cp 'target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}-gui${{ steps.vars.outputs.EXE_suffix }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # `strip` binary (if needed)
-        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' ; fi
+        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then
+          "${{ steps.vars.outputs.STRIP }}" '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}';
+          "${{ steps.vars.outputs.STRIP }}" '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/${{ env.PROJECT_NAME }}-gui${{ steps.vars.outputs.EXE_suffix }}';
+        fi
         # base compressed package
         pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
         case ${{ matrix.job.target }} in
