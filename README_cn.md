@@ -159,7 +159,7 @@ episode_re = "^(?P<name>リトルウィッチアカデミア|小魔女学园) (?
 在设置好源文件夹后，使用如下命令即可生成 nfo 文件：
 
 ```
-dantalian --source <source folders>
+dantalian gen --source <source folders>
 ```
 
 可以一次指定多个源文件夹。

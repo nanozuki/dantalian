@@ -172,7 +172,7 @@ episode_re = "^(?P<name>リトルウィッチアカデミア|小魔女学园) (?
 After setting all source files, you can generate nfo files by this command:
 
 ```
-dantalian --source <source folders>
+dantalian gen --source <source folders>
 ```
 
 You can specify multiple source folders at once.

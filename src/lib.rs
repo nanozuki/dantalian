@@ -11,10 +11,10 @@ pub use bin::run;
 
 #[cfg(feature = "bin")]
 mod bin {
+    use crate::bangumi;
     use crate::dantalian::{dantalian, dantalian_movie};
     use crate::logger::Logger;
     use crate::options::{BgmCmd, BgmSubCmd, Opts, SubCmd};
-    use crate::bangumi;
     use anyhow::Result;
     use log::set_logger;
     use std::collections::HashSet;
