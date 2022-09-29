@@ -19,6 +19,9 @@ pub struct Opts {
     /// force re-generate all nfo files for all anime
     #[clap(long)]
     pub force_all: bool,
+    /// use your personal token to access more subject. get one from https://next.bgm.tv/demo/access-token/create.
+    #[clap(long)]
+    pub access_token: Option<String>,
     #[clap(subcommand)]
     pub subcmd: Option<SubCmd>,
 }

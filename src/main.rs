@@ -12,20 +12,31 @@ mod options;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let opts: Opts = Opts::parse();
-    match opts.verbose {
+    let Opts {
+        access_token,
+        verbose,
+        subcmd,
+        force_all,
+        force,
+        source,
+        movie_source,
+    } = Opts::parse();
+    if let Some(access_token) = access_token {
+        bangumi::set_access_token(access_token);
+    }
+    match verbose {
         true => set_logger(Logger::init(log::LevelFilter::Trace)).unwrap(),
         false => set_logger(Logger::init(log::LevelFilter::Info)).unwrap(),
     }
-    match opts.subcmd {
+    match subcmd {
         None => {
-            let force: HashSet<String> = HashSet::from_iter(opts.force);
-            let force_all = opts.force_all;
+            let force: HashSet<String> = HashSet::from_iter(force);
+            let force_all = force_all;
             let is_force = |path| force_all || force.contains(&path);
-            for source in opts.source {
+            for source in source {
                 dantalian(&source, &is_force).await?;
             }
-            for movie_source in opts.movie_source {
+            for movie_source in movie_source {
                 dantalian_movie(&movie_source, &is_force).await?;
             }
             Ok(())

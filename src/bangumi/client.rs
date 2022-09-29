@@ -3,10 +3,18 @@ use anyhow::{Context, Result};
 use hyper::{Body, Client, Request, Uri};
 use hyper_tls::HttpsConnector;
 use log::{debug, trace};
+use once_cell::sync::OnceCell;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
 use std::fmt;
 use std::time::SystemTime;
+
+pub(crate) static ACCESS_TOKEN: OnceCell<String> = OnceCell::new();
+
+pub fn set_access_token(token: String) {
+    // Should only set once. Set twice is a bug.
+    ACCESS_TOKEN.set(token).unwrap();
+}
 
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
     let encoded_keyword = utf8_percent_encode(keyword, NON_ALPHANUMERIC);
@@ -90,12 +98,14 @@ async fn request<T: DeserializeOwned>(path: &str) -> Result<T> {
         .parse()
         .with_context(|| "parse url")?;
     debug!("url = {}", &url);
-    let req = Request::get(url)
-        .header(
-            "User-Agent",
-            format!("Dantalian/{}", env!("CARGO_PKG_VERSION")),
-        )
-        .body(Body::default())?;
+    let mut req = Request::get(url).header(
+        "User-Agent",
+        format!("Dantalian/{}", env!("CARGO_PKG_VERSION")),
+    );
+    if let Some(access_token) = ACCESS_TOKEN.get() {
+        req = req.header("Authorization", format!("Bearer {}", access_token));
+    }
+    let req = req.body(Body::default())?;
     let res = client.request(req).await.with_context(|| "get request")?;
     debug!("status: {}", res.status());
     let buf = hyper::body::to_bytes(res)
