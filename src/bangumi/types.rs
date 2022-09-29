@@ -179,7 +179,7 @@ pub struct Staff {
     pub jobs: Vec<String>,
 }
 
-#[derive(Deserialize_repr, PartialEq, Debug)]
+#[derive(Deserialize_repr, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum EpisodeType {
     Honpen = 0,
@@ -205,7 +205,7 @@ impl fmt::Display for EpisodeType {
     }
 }
 
-#[derive(Deserialize, PartialEq, Debug)]
+#[derive(Deserialize, PartialEq, Eq, Debug)]
 pub enum EpisodeStatus {
     Air,
     Today,

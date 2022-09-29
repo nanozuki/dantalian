@@ -67,7 +67,7 @@ impl Job {
         let sp = caps
             .and_then(|c| c.name("sp"))
             .map_or(false, |mat| mat.as_str() != "");
-        return Ok(Some(EpisodeJob {
+        Ok(Some(EpisodeJob {
             index: ep,
             is_sp: sp,
             filename: String::from(
@@ -75,7 +75,7 @@ impl Job {
                     .to_str()
                     .ok_or_else(|| anyhow!("invalid nfo file name"))?,
             ),
-        }));
+        }))
     }
 
     pub fn is_empty(&self) -> bool {

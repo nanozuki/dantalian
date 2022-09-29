@@ -11,12 +11,7 @@ pub struct AnimeData {
 
 impl AnimeData {
     pub fn find_episode(&self, index: &str, is_sp: bool) -> Option<&Episode> {
-        for ep in self.episodes.iter() {
-            if ep.ep_index == index && ep.is_sp == is_sp {
-                return Some(ep);
-            }
-        }
-        None
+        self.episodes.iter().find(|&ep| ep.ep_index == index && ep.is_sp == is_sp)
     }
 }
 
