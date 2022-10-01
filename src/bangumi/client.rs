@@ -1,4 +1,4 @@
-use super::types::{Episode, SubjectBase, SubjectMedium, SubjectType};
+use super::types::{Episode, Subject, SubjectBase, SubjectType};
 use anyhow::{Context, Result};
 use hyper::http::request;
 use hyper::{Body, Client, Method, Request, Uri};
@@ -59,7 +59,7 @@ pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
 }
 
 pub struct BgmAnime {
-    pub subject: SubjectMedium,
+    pub subject: Subject,
     pub episodes: Vec<Episode>,
 }
 
@@ -69,9 +69,9 @@ pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
     Ok(BgmAnime { subject, episodes })
 }
 
-pub async fn get_subject_info(id: u32) -> Result<SubjectMedium> {
+pub async fn get_subject_info(id: u32) -> Result<Subject> {
     let path = format!("/subjects/{}", id);
-    let subject: SubjectMedium = request(path)
+    let subject: Subject = request(path)
         .await
         .with_context(|| format!("request get subject: {}", id))?;
     debug!("subject: {:#?}", &subject);

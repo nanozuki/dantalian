@@ -28,12 +28,12 @@ impl From<BgmAnime> for AnimeData {
                 rating_value: bgm_data.subject.rating.score,
                 rating_votes: bgm_data.subject.rating.total,
                 has_sp: false,
-                eps_count: bgm_data.subject.eps_count,
+                eps_count: bgm_data.subject.total_episodes,
                 plot: bgm_data.subject.summary,
                 poster: bgm_data.subject.images.map(|img| img.large),
                 genres: vec![],
                 tags: vec![],
-                premiered: bgm_data.subject.air_date,
+                premiered: bgm_data.subject.date,
                 status: None,
                 studio: None,
                 actors: Rc::from(Vec::new()),
@@ -41,42 +41,42 @@ impl From<BgmAnime> for AnimeData {
         };
 
         let mut actors: Vec<Actor> = Vec::new();
-        for crt in bgm_data.subject.crt.iter() {
-            match &crt.actors {
-                Some(crt_actors) => {
-                    for a in crt_actors.iter() {
-                        actors.push(Actor {
-                            name: String::from(&crt.name_cn),
-                            role: String::from(&a.name),
-                            order: actors.len() as u32,
-                            thumb: String::from(&crt.images.large),
-                        });
-                    }
-                }
-                None => {
-                    actors.push(Actor {
-                        name: String::from(&crt.name_cn),
-                        role: String::from("N/A"),
-                        order: actors.len() as u32,
-                        thumb: String::from(&crt.images.large),
-                    });
-                }
-            }
-        }
+        // for crt in bgm_data.subject.crt.iter() {
+        //     match &crt.actors {
+        //         Some(crt_actors) => {
+        //             for a in crt_actors.iter() {
+        //                 actors.push(Actor {
+        //                     name: String::from(&crt.name_cn),
+        //                     role: String::from(&a.name),
+        //                     order: actors.len() as u32,
+        //                     thumb: String::from(&crt.images.large),
+        //                 });
+        //             }
+        //         }
+        //         None => {
+        //             actors.push(Actor {
+        //                 name: String::from(&crt.name_cn),
+        //                 role: String::from("N/A"),
+        //                 order: actors.len() as u32,
+        //                 thumb: String::from(&crt.images.large),
+        //             });
+        //         }
+        //     }
+        // }
         data.tvshow.actors = Rc::from(actors);
 
         let mut directors: Vec<String> = Vec::new();
         let mut credits: Vec<String> = Vec::new();
-        for staff in bgm_data.subject.staff.iter() {
-            for job in staff.jobs.iter() {
-                if job == "导演" {
-                    directors.push(String::from(&staff.name));
-                }
-                if job == "脚本" {
-                    credits.push(String::from(&staff.name));
-                }
-            }
-        }
+        // for staff in bgm_data.subject.staff.iter() {
+        //     for job in staff.jobs.iter() {
+        //         if job == "导演" {
+        //             directors.push(String::from(&staff.name));
+        //         }
+        //         if job == "脚本" {
+        //             credits.push(String::from(&staff.name));
+        //         }
+        //     }
+        // }
         let rc_directors = Rc::from(directors);
         let rc_credits = Rc::from(credits);
 

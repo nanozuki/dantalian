@@ -50,6 +50,7 @@ pub struct SubjectRatingCount {
 
 #[derive(Deserialize, Debug)]
 pub struct SubjectRating {
+    pub rank: u32,
     pub total: u32,
     pub score: f64,
     pub count: SubjectRatingCount,
@@ -107,48 +108,43 @@ impl fmt::Display for SubjectBase {
     }
 }
 
+/// There is no SubjectMedium/Base or else.
+/// infobox is too big and contains things we don't need.
+/// volumes is for book, has no relations with anime.
 #[derive(Deserialize, Debug)]
-pub struct SubjectMedium {
+pub struct Subject {
     pub id: u32,
-    pub url: String,
     #[serde(rename = "type")]
     pub subject_type: SubjectType,
     pub name: String,
     pub name_cn: String,
     pub summary: String,
-    pub air_date: String,
-    pub air_weekday: u8,
+    pub nsfw: bool,
+    pub date: String,
+    /// TV, Web, 欧美剧, PS4...
+    pub platform: String,
     pub images: Option<SubjectImage>,
     pub eps: Option<u32>,
-    pub eps_count: Option<u32>,
+    pub total_episodes: Option<u32>,
     pub rating: SubjectRating,
-    pub rank: Option<u32>,
     pub collection: SubjectCollection,
-    pub crt: Vec<Character>,
-    pub staff: Vec<Staff>,
+    #[serde(default)]
+    pub tags: Vec<Tag>,
 }
 
-impl fmt::Display for SubjectMedium {
+impl Subject {
+    pub fn url(&self) -> String {
+        format!("{}/subject/{}", BGM_WEB, self.id)
+    }
+}
+
+impl fmt::Display for Subject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = indent_display(f);
-        let crts: String = self
-            .crt
-            .iter()
-            .map(|c| c.name.as_str())
-            .collect::<Vec<&str>>()
-            .join("/");
-        let staff: String = self
-            .staff
-            .iter()
-            .map(|s| s.name.as_str())
-            .collect::<Vec<&str>>()
-            .join("/");
         let strings = vec![
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
-            format!("{}* {}", prefix, self.url),
-            format!("{}* Air Date: {}", prefix, self.air_date),
-            format!("{}* Characters: {}", prefix, crts),
-            format!("{}* Staff: {}", prefix, staff),
+            format!("{}* {}", prefix, self.url()),
+            format!("{}* Air Date: {}", prefix, self.date),
             format!("{}* {}", prefix, self.summary),
         ];
         write!(f, "{}", strings.join("\n"))
