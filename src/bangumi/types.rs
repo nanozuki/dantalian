@@ -3,6 +3,8 @@ use serde::Deserialize;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::fmt;
 
+const BGM_WEB: &str = "https://bgm.tv";
+
 #[derive(Deserialize_repr, Debug, Serialize_repr)]
 #[repr(u32)]
 pub enum SubjectType {
@@ -63,17 +65,33 @@ pub struct SubjectCollection {
 }
 
 #[derive(Deserialize, Debug)]
+pub struct Tag {
+    pub name: String,
+    pub count: u32,
+}
+
+/// Subject in search.
+#[derive(Deserialize, Debug)]
 pub struct SubjectBase {
     pub id: u32,
-    pub url: String,
     #[serde(rename = "type")]
-    pub subject_type: SubjectType,
+    pub subject_type: Option<SubjectType>,
     pub name: String,
     pub name_cn: String,
     pub summary: String,
-    pub air_date: String,
-    pub air_weekday: u8,
-    pub images: Option<SubjectImage>,
+    pub date: String,
+    pub score: f32,
+    pub rank: u32,
+    pub images: Option<String>,
+    #[serde(default)]
+    pub tags: Vec<Tag>,
+}
+
+/// New subjectbase has no url field.
+impl SubjectBase {
+    fn url(&self) -> String {
+        format!("{}/subject/{}", BGM_WEB, self.id)
+    }
 }
 
 impl fmt::Display for SubjectBase {
@@ -82,8 +100,8 @@ impl fmt::Display for SubjectBase {
         let strings = vec![
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}  Subject ID: {}", prefix, self.id),
-            format!("{}  Air Date: {}", prefix, self.air_date),
-            format!("{}  URL: {}", prefix, self.url),
+            format!("{}  Air Date: {}", prefix, self.date),
+            format!("{}  URL: {}", prefix, self.url()),
         ];
         write!(f, "{}", strings.join("\n"))
     }

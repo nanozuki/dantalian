@@ -40,13 +40,18 @@ impl<'a> BangumiRequest for SearchSubjectRequest<'a> {
     }
 }
 
+#[derive(Deserialize, Debug)]
+pub struct SearchResponse {
+    pub data: Vec<SubjectBase>,
+}
+
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
     let search = SearchSubjectRequest {
         keyword,
         r#type: SubjectType::Anime,
     };
     trace!("request url {}", search.uri()?.to_string());
-    let res: SearchResponse = request(search)
+    let res = request(search)
         .await
         .with_context(|| "request search anime")?;
     debug!("obj: {:?}", &res);
@@ -83,12 +88,6 @@ pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {
         debug!("subject ep: {:#?}", &ep);
     }
     Ok(res)
-}
-
-#[derive(Deserialize, Debug)]
-pub struct SearchResponse {
-    pub results: u32,
-    pub list: Vec<SubjectBase>,
 }
 
 #[derive(Deserialize, Debug)]
