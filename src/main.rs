@@ -50,8 +50,8 @@ async fn main() -> Result<()> {
 async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
     match opts.subcmd {
         BgmSubCmd::Search(search_opts) => {
-            let keyword = &search_opts.keyword.join(" ");
-            let res = bangumi::search_anime(keyword).await?;
+            let keyword = search_opts.keyword.join(" ");
+            let res = bangumi::search_anime(&keyword).await?;
             info!("found {} result(s):\n", &res.results);
             for item in res.list.iter() {
                 info!("{:>1}", item);

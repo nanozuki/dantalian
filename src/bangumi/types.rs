@@ -1,9 +1,9 @@
 use crate::logger::indent_display;
 use serde::Deserialize;
-use serde_repr::Deserialize_repr;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::fmt;
 
-#[derive(Deserialize_repr, Debug)]
+#[derive(Deserialize_repr, Debug, Serialize_repr)]
 #[repr(u32)]
 pub enum SubjectType {
     Book = 1,
