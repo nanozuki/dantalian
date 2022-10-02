@@ -97,7 +97,8 @@ impl From<BgmAnime> for AnimeData {
                     directors: Rc::clone(&rc_directors),
                     credits: Rc::clone(&rc_credits),
                     premiered: String::from(&data.tvshow.premiered),
-                    status: Some(format!("{:?}", be.status)),
+                    // New bangumi api has no status.
+                    status: None,
                     aired: Some(be.airdate),
                     studio: None,
                     actors: Rc::clone(&data.tvshow.actors),

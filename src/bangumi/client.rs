@@ -65,7 +65,7 @@ pub struct BgmAnime {
 
 pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
     let subject = get_subject_info(id).await?;
-    let episodes = get_subject_episodes(id).await?.eps;
+    let episodes = get_subject_episodes(id).await?.data;
     Ok(BgmAnime { subject, episodes })
 }
 
@@ -80,11 +80,11 @@ pub async fn get_subject_info(id: u32) -> Result<Subject> {
 
 pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {
     trace!("get_subject_info: {}", id);
-    let path = format!("/episodes/?subject_id={}", id);
+    let path = format!("/episodes?subject_id={}", id);
     let res: EpisodeResponse = request(path)
         .await
         .with_context(|| format!("get subject episode {}", id))?;
-    for ep in &res.eps {
+    for ep in &res.data {
         debug!("subject ep: {:#?}", &ep);
     }
     Ok(res)
@@ -92,15 +92,14 @@ pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {
 
 #[derive(Deserialize, Debug)]
 pub struct EpisodeResponse {
-    // ignore SubjectBase
-    pub eps: Vec<Episode>,
+    pub data: Vec<Episode>,
 }
 
 impl fmt::Display for EpisodeResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = f.width().unwrap_or(0);
         let strings: Vec<String> = self
-            .eps
+            .data
             .iter()
             .map(|ep| format!("{:>width$}", ep, width = width))
             .collect();

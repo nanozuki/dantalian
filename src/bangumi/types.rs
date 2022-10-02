@@ -229,9 +229,9 @@ pub enum EpisodeStatus {
 #[derive(Deserialize, Debug)]
 pub struct Episode {
     pub id: u32,
-    pub url: String,
     #[serde(rename = "type")]
     pub episode_type: EpisodeType,
+    pub ep: Option<u32>,
     pub sort: f64,
     pub name: String,
     pub name_cn: String,
@@ -239,12 +239,13 @@ pub struct Episode {
     pub airdate: String,
     pub comment: u32,
     pub desc: String,
-    pub status: EpisodeStatus,
+    /// Disc is for music. ignore it.
+    pub duration_seconds: Option<u32>,
 }
 
 impl Episode {
     pub fn is_empty(&self) -> bool {
-        self.status == EpisodeStatus::NA && self.name.is_empty() && self.name_cn.is_empty()
+        self.name.is_empty() && self.name_cn.is_empty()
     }
 }
 
