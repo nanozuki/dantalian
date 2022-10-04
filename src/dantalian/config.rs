@@ -1,4 +1,4 @@
-use crate::bangumi::{get_subject_info, search_anime};
+use crate::bangumi::{get_subject, search_anime};
 use crate::info;
 use anyhow::{anyhow, bail, Result};
 use once_cell::sync::Lazy;
@@ -43,7 +43,7 @@ impl Config {
                 episode_re: Regex::new(&re)?,
             }),
             None => {
-                let subject = get_subject_info(cf.subject_id).await?;
+                let subject = get_subject(cf.subject_id).await?;
                 let name_qry = format!("{}|{}", subject.name, subject.name_cn);
                 Ok(Config {
                     subject_id: cf.subject_id,

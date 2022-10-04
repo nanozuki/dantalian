@@ -180,17 +180,47 @@ pub struct Actor {
     pub images: Option<CharacterImage>,
 }
 
+#[derive(Deserialize_repr, Debug)]
+#[repr(u32)]
+pub enum PersonType {
+    Person = 1,
+    Company = 2,
+    Group = 3,
+}
+
 #[derive(Deserialize, Debug)]
-pub struct Staff {
+#[serde(rename_all = "lowercase")]
+pub enum PersonCareer {
+    Producer,
+    Mangaka,
+    Artist,
+    Seiyu,
+    Writer,
+    Illustrator,
+    Actor,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Person {
     pub id: u32,
-    pub url: String,
-    pub name: String,
     pub images: Option<CharacterImage>,
-    pub name_cn: String,
-    pub comment: u32,
-    pub collects: u32,
-    pub role_name: String,
-    pub jobs: Vec<String>,
+    #[serde(rename = "type")]
+    pub person_type: PersonType,
+    pub career: Vec<PersonCareer>,
+    pub name: String,
+    pub relation: String,
+}
+
+pub struct Persons(pub Vec<Person>);
+
+impl fmt::Display for Persons {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut names: Vec<&str> = self.0.iter().map(|p| p.name.as_str()).collect();
+        names.sort();
+        names.dedup();
+        let prefix = indent_display(f);
+        write!(f, "{}* staff: {}", prefix, names.join("/"))
+    }
 }
 
 #[derive(Deserialize_repr, PartialEq, Eq, Debug)]

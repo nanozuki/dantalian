@@ -59,8 +59,12 @@ async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
             Ok(())
         }
         BgmSubCmd::Get(get_opts) => {
-            let subject = bangumi::get_subject_info(get_opts.id).await?;
+            let subject = bangumi::get_subject(get_opts.id).await?;
             info!("{}", &subject);
+            if !get_opts.no_person {
+                let persons = bangumi::get_subject_person(get_opts.id).await?;
+                info!("{}", persons);
+            }
             Ok(())
         }
         BgmSubCmd::GetEp(get_opts) => {

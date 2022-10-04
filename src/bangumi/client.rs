@@ -1,4 +1,4 @@
-use super::types::{Episode, Subject, SubjectBase, SubjectType};
+use super::types::{Episode, Person, Persons, Subject, SubjectBase, SubjectType};
 use anyhow::{Context, Result};
 use hyper::http::request;
 use hyper::{Body, Client, Method, Request, Uri};
@@ -22,7 +22,8 @@ pub fn set_access_token(token: String) {
 #[derive(Serialize)]
 struct SearchSubjectRequest<'a> {
     pub keyword: &'a str,
-    pub r#type: SubjectType,
+    #[serde(rename = "type")]
+    pub subject_type: SubjectType,
 }
 
 impl<'a> BangumiRequest for SearchSubjectRequest<'a> {
@@ -48,7 +49,7 @@ pub struct SearchResponse {
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
     let search = SearchSubjectRequest {
         keyword,
-        r#type: SubjectType::Anime,
+        subject_type: SubjectType::Anime,
     };
     trace!("request url {}", search.uri()?.to_string());
     let res = request(search)
@@ -61,21 +62,36 @@ pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
 pub struct BgmAnime {
     pub subject: Subject,
     pub episodes: Vec<Episode>,
+    pub persons: Vec<Person>,
 }
 
 pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
-    let subject = get_subject_info(id).await?;
+    let subject = get_subject(id).await?;
+    let persons = get_subject_person(id).await?.0;
     let episodes = get_subject_episodes(id).await?.data;
-    Ok(BgmAnime { subject, episodes })
+    Ok(BgmAnime {
+        subject,
+        episodes,
+        persons,
+    })
 }
 
-pub async fn get_subject_info(id: u32) -> Result<Subject> {
+pub async fn get_subject(id: u32) -> Result<Subject> {
     let path = format!("/subjects/{}", id);
-    let subject: Subject = request(path)
+    let subject = request(path)
         .await
         .with_context(|| format!("request get subject: {}", id))?;
     debug!("subject: {:#?}", &subject);
     Ok(subject)
+}
+
+pub async fn get_subject_person(id: u32) -> Result<Persons> {
+    let path = format!("/subjects/{}/persons", id);
+    let persons = request(path)
+        .await
+        .with_context(|| format!("request get subject persons: {}", id))?;
+    debug!("persons: {:#?}", &persons);
+    Ok(Persons(persons))
 }
 
 pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {
