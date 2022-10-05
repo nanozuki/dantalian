@@ -1,4 +1,6 @@
-use super::types::{Episode, Person, Persons, Subject, SubjectBase, SubjectType};
+use super::types::{
+    Character, Characters, Episode, Person, Persons, Subject, SubjectBase, SubjectType,
+};
 use anyhow::{Context, Result};
 use hyper::http::request;
 use hyper::{Body, Client, Method, Request, Uri};
@@ -63,16 +65,19 @@ pub struct BgmAnime {
     pub subject: Subject,
     pub episodes: Vec<Episode>,
     pub persons: Vec<Person>,
+    pub characters: Vec<Character>,
 }
 
 pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
     let subject = get_subject(id).await?;
-    let persons = get_subject_person(id).await?.0;
+    let persons = get_subject_persons(id).await?.0;
+    let characters = get_subject_characters(id).await?.0;
     let episodes = get_subject_episodes(id).await?.data;
     Ok(BgmAnime {
         subject,
         episodes,
         persons,
+        characters,
     })
 }
 
@@ -85,13 +90,22 @@ pub async fn get_subject(id: u32) -> Result<Subject> {
     Ok(subject)
 }
 
-pub async fn get_subject_person(id: u32) -> Result<Persons> {
+pub async fn get_subject_persons(id: u32) -> Result<Persons> {
     let path = format!("/subjects/{}/persons", id);
     let persons = request(path)
         .await
         .with_context(|| format!("request get subject persons: {}", id))?;
     debug!("persons: {:#?}", &persons);
     Ok(Persons(persons))
+}
+
+pub async fn get_subject_characters(id: u32) -> Result<Characters> {
+    let path = format!("/subjects/{}/characters", id);
+    let characters = request(path)
+        .await
+        .with_context(|| format!("request get subject characters: {}", id))?;
+    debug!("characters: {:#?}", &characters);
+    Ok(Characters(characters))
 }
 
 pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {

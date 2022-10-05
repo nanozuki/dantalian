@@ -60,7 +60,10 @@ pub struct BgmGetSubjectOpt {
     pub id: u32,
     /// doesn't get person(staff) infomation.
     #[clap(long)]
-    pub no_person: bool,
+    pub no_persons: bool,
+    /// doesn't get characters infomation.
+    #[clap(long)]
+    pub no_characters: bool,
 }
 
 #[derive(Parser)]

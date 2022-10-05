@@ -23,6 +23,7 @@ impl From<BgmAnime> for AnimeData {
             subject,
             episodes,
             persons,
+            characters,
         } = bgm_data;
         let mut data = AnimeData {
             episodes: Vec::new(),
@@ -46,28 +47,25 @@ impl From<BgmAnime> for AnimeData {
         };
 
         let mut actors: Vec<Actor> = Vec::new();
-        // for crt in bgm_data.subject.crt.iter() {
-        //     match &crt.actors {
-        //         Some(crt_actors) => {
-        //             for a in crt_actors.iter() {
-        //                 actors.push(Actor {
-        //                     name: String::from(&crt.name_cn),
-        //                     role: String::from(&a.name),
-        //                     order: actors.len() as u32,
-        //                     thumb: String::from(&crt.images.large),
-        //                 });
-        //             }
-        //         }
-        //         None => {
-        //             actors.push(Actor {
-        //                 name: String::from(&crt.name_cn),
-        //                 role: String::from("N/A"),
-        //                 order: actors.len() as u32,
-        //                 thumb: String::from(&crt.images.large),
-        //             });
-        //         }
-        //     }
-        // }
+        for character in characters {
+            if character.actors.is_empty() {
+                actors.push(Actor {
+                    name: character.name,
+                    role: String::from("N/A"),
+                    order: actors.len() as u32,
+                    thumb: character.images.large,
+                });
+            } else {
+                for actor in character.actors {
+                    actors.push(Actor {
+                        name: character.name.clone(),
+                        role: actor.name,
+                        order: actors.len() as u32,
+                        thumb: character.images.large.clone(),
+                    });
+                }
+            }
+        }
         data.tvshow.actors = Rc::from(actors);
 
         let mut credits: Vec<String> = Vec::new();

@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::rc::Rc;
 
-use crate::bangumi::Subject;
+use crate::bangumi::{Character, Subject};
 
 pub const TVSHOW_NFO_NAME: &str = "tvshow.nfo";
 
@@ -135,31 +135,28 @@ pub struct Movie {
     pub actors: Vec<Actor>,
 }
 
-impl From<Subject> for Movie {
-    fn from(subject: Subject) -> Self {
+impl Movie {
+    pub fn from_bgm(subject: Subject, characters: Vec<Character>) -> Self {
         let mut actors: Vec<Actor> = Vec::new();
-        // for crt in subject.crt.iter() {
-        //     match &crt.actors {
-        //         Some(crt_actors) => {
-        //             for a in crt_actors.iter() {
-        //                 actors.push(Actor {
-        //                     name: String::from(&crt.name_cn),
-        //                     role: String::from(&a.name),
-        //                     order: actors.len() as u32,
-        //                     thumb: String::from(&crt.images.large),
-        //                 });
-        //             }
-        //         }
-        //         None => {
-        //             actors.push(Actor {
-        //                 name: String::from(&crt.name_cn),
-        //                 role: String::from("N/A"),
-        //                 order: actors.len() as u32,
-        //                 thumb: String::from(&crt.images.large),
-        //             });
-        //         }
-        //     }
-        // }
+        for character in characters {
+            if character.actors.is_empty() {
+                actors.push(Actor {
+                    name: character.name,
+                    role: String::from("N/A"),
+                    order: actors.len() as u32,
+                    thumb: character.images.large,
+                });
+            } else {
+                for actor in character.actors {
+                    actors.push(Actor {
+                        name: character.name.clone(),
+                        role: actor.name,
+                        order: actors.len() as u32,
+                        thumb: character.images.large.clone(),
+                    });
+                }
+            }
+        }
         Self {
             uid: subject.id,
             title: subject.name_cn,

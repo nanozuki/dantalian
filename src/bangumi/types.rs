@@ -151,17 +151,31 @@ impl fmt::Display for Subject {
     }
 }
 
+// Bgm api doc list this as Person, but has different fields.
+// So i think they should use different struct.
+#[derive(Deserialize, Debug)]
+pub struct Actor {
+    pub id: u32,
+    pub name: String,
+    #[serde(rename = "type")]
+    pub actor_type: PersonType,
+    #[serde(default)]
+    pub career: Vec<PersonCareer>,
+    pub short_summary: String,
+    pub locked: bool,
+    pub images: Option<CharacterImage>,
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Character {
     pub id: u32,
-    pub url: String,
     pub name: String,
+    #[serde(rename = "type")]
+    pub character_type: u32,
     pub images: CharacterImage,
-    pub name_cn: String,
-    pub comment: u32,
-    pub collects: u32,
-    pub actors: Option<Vec<Actor>>,
-    pub role_name: String, // example: 主角
+    pub relation: String,
+    #[serde(default)]
+    pub actors: Vec<Actor>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -172,12 +186,16 @@ pub struct CharacterImage {
     pub grid: String,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Actor {
-    pub id: u32,
-    pub url: String,
-    pub name: String,
-    pub images: Option<CharacterImage>,
+pub struct Characters(pub Vec<Character>);
+
+impl fmt::Display for Characters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut names: Vec<&str> = self.0.iter().map(|p| p.name.as_str()).collect();
+        names.sort();
+        names.dedup();
+        let prefix = indent_display(f);
+        write!(f, "{}* characters: {}", prefix, names.join("/"))
+    }
 }
 
 #[derive(Deserialize_repr, Debug)]

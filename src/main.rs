@@ -61,9 +61,13 @@ async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
         BgmSubCmd::Get(get_opts) => {
             let subject = bangumi::get_subject(get_opts.id).await?;
             info!("{}", &subject);
-            if !get_opts.no_person {
-                let persons = bangumi::get_subject_person(get_opts.id).await?;
+            if !get_opts.no_persons {
+                let persons = bangumi::get_subject_persons(get_opts.id).await?;
                 info!("{}", persons);
+            }
+            if !get_opts.no_characters {
+                let characters = bangumi::get_subject_characters(get_opts.id).await?;
+                info!("{}", characters);
             }
             Ok(())
         }
