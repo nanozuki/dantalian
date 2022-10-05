@@ -56,7 +56,9 @@ pub struct SearchResponse {
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
     let search = SearchSubjectRequest {
         keyword,
-        filter: SearchSubjectFilter { subject_type: vec![SubjectType::Anime] }
+        filter: SearchSubjectFilter {
+            subject_type: vec![SubjectType::Anime],
+        },
     };
     trace!("request url {}", search.uri()?.to_string());
     let res = request(search)
