@@ -22,10 +22,15 @@ pub fn set_access_token(token: String) {
 }
 
 #[derive(Serialize)]
+struct SearchSubjectFilter {
+    #[serde(rename = "type")]
+    subject_type: Vec<SubjectType>,
+}
+
+#[derive(Serialize)]
 struct SearchSubjectRequest<'a> {
     pub keyword: &'a str,
-    #[serde(rename = "type")]
-    pub subject_type: SubjectType,
+    pub filter: SearchSubjectFilter,
 }
 
 impl<'a> BangumiRequest for SearchSubjectRequest<'a> {
@@ -51,7 +56,7 @@ pub struct SearchResponse {
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
     let search = SearchSubjectRequest {
         keyword,
-        subject_type: SubjectType::Anime,
+        filter: SearchSubjectFilter { subject_type: vec![SubjectType::Anime] }
     };
     trace!("request url {}", search.uri()?.to_string());
     let res = request(search)
