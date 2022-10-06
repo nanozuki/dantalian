@@ -1,9 +1,35 @@
 use crate::logger::indent_display;
 use serde::Deserialize;
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::fmt;
+use std::{collections::HashMap, error, fmt};
 
 const BGM_WEB: &str = "https://bgm.tv";
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum BgmErrorDetail {
+    Str(String),
+    Map(HashMap<String, String>),
+}
+
+#[derive(Deserialize, Debug)]
+pub struct BgmError {
+    pub title: String,
+    pub description: String,
+    pub details: BgmErrorDetail,
+}
+
+impl fmt::Display for BgmError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "[{}] {}\n* {:?}",
+            self.title, self.description, self.details
+        )
+    }
+}
+
+impl error::Error for BgmError {}
 
 #[derive(Deserialize_repr, Debug, Serialize_repr)]
 #[repr(u32)]

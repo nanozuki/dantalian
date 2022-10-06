@@ -1,5 +1,5 @@
 use super::types::{
-    Character, Characters, Episode, Person, Persons, Subject, SubjectBase, SubjectType,
+    BgmError, Character, Characters, Episode, Person, Persons, Subject, SubjectBase, SubjectType,
 };
 use anyhow::{Context, Result};
 use hyper::http::request;
@@ -182,11 +182,20 @@ async fn request<T: DeserializeOwned, Req: BangumiRequest>(bgm_req: Req) -> Resu
     );
     let body = bgm_req.body()?.unwrap_or_default();
     let req = req.body(body)?;
+
     let res = client.request(req).await.with_context(|| "get request")?;
+    let is_ok = res.status().is_success();
     debug!("status: {}", res.status());
+
     let buf = hyper::body::to_bytes(res)
         .await
         .with_context(|| "read body")?;
+
+    if !is_ok {
+        let err: BgmError = serde_json::from_slice(&buf).with_context(|| "deserialize error")?;
+        Err(err)?;
+    }
+
     let res_obj: T = serde_json::from_slice(&buf).with_context(|| {
         let body = String::from_utf8(buf.to_vec()).unwrap_or_else(|_| "not utf8".to_string());
         format!("get body: {}", body)
