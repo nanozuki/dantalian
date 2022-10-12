@@ -1,4 +1,4 @@
-use crate::bangumi::get_subject_info;
+use crate::bangumi::{get_subject, get_subject_characters};
 use crate::dantalian::Config;
 use crate::nfogen::nfo::{Movie, MOVIE_NFO_NAME};
 use crate::nfogen::Generator;
@@ -34,10 +34,14 @@ async fn handle_dir<'a>(path: &Path, force: bool, generator: &'a Generator<'a>) 
         // do not need generate
         return Ok(());
     }
-    let movie_data = get_subject_info(subject_id)
+    let movie_data = get_subject(subject_id)
         .await
         .with_context(|| "get_movie_info")?;
-    let movie = Movie::from(movie_data);
+    let characters = get_subject_characters(subject_id)
+        .await
+        .with_context(|| "get_movie_character")?
+        .0;
+    let movie = Movie::from_bgm(movie_data, characters);
     let movie_nfo = generator.gen_movie_nfo(&movie)?;
     let mut nfo_file = File::create(movie_nfo_path)?;
     nfo_file.write_all(movie_nfo.as_bytes())?;

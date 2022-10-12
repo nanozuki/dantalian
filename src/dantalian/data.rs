@@ -19,21 +19,27 @@ impl AnimeData {
 
 impl From<BgmAnime> for AnimeData {
     fn from(bgm_data: BgmAnime) -> Self {
+        let BgmAnime {
+            subject,
+            episodes,
+            persons,
+            characters,
+        } = bgm_data;
         let mut data = AnimeData {
             episodes: Vec::new(),
             tvshow: TVShow {
-                uid: bgm_data.subject.id,
-                title: bgm_data.subject.name_cn,
-                original_title: bgm_data.subject.name,
-                rating_value: bgm_data.subject.rating.score,
-                rating_votes: bgm_data.subject.rating.total,
+                uid: subject.id,
+                title: subject.name_cn,
+                original_title: subject.name,
+                rating_value: subject.rating.score,
+                rating_votes: subject.rating.total,
                 has_sp: false,
-                eps_count: bgm_data.subject.eps_count,
-                plot: bgm_data.subject.summary,
-                poster: bgm_data.subject.images.map(|img| img.large),
+                eps_count: subject.total_episodes,
+                plot: subject.summary,
+                poster: subject.images.map(|img| img.large),
                 genres: vec![],
                 tags: vec![],
-                premiered: bgm_data.subject.air_date,
+                premiered: subject.date,
                 status: None,
                 studio: None,
                 actors: Rc::from(Vec::new()),
@@ -41,46 +47,41 @@ impl From<BgmAnime> for AnimeData {
         };
 
         let mut actors: Vec<Actor> = Vec::new();
-        for crt in bgm_data.subject.crt.iter() {
-            match &crt.actors {
-                Some(crt_actors) => {
-                    for a in crt_actors.iter() {
-                        actors.push(Actor {
-                            name: String::from(&crt.name_cn),
-                            role: String::from(&a.name),
-                            order: actors.len() as u32,
-                            thumb: String::from(&crt.images.large),
-                        });
-                    }
-                }
-                None => {
+        for character in characters {
+            if character.actors.is_empty() {
+                actors.push(Actor {
+                    name: character.name,
+                    role: String::from("N/A"),
+                    order: actors.len() as u32,
+                    thumb: character.images.large,
+                });
+            } else {
+                for actor in character.actors {
                     actors.push(Actor {
-                        name: String::from(&crt.name_cn),
-                        role: String::from("N/A"),
+                        name: character.name.clone(),
+                        role: actor.name,
                         order: actors.len() as u32,
-                        thumb: String::from(&crt.images.large),
+                        thumb: character.images.large.clone(),
                     });
                 }
             }
         }
         data.tvshow.actors = Rc::from(actors);
 
-        let mut directors: Vec<String> = Vec::new();
         let mut credits: Vec<String> = Vec::new();
-        for staff in bgm_data.subject.staff.iter() {
-            for job in staff.jobs.iter() {
-                if job == "导演" {
-                    directors.push(String::from(&staff.name));
-                }
-                if job == "脚本" {
-                    credits.push(String::from(&staff.name));
-                }
+        let mut directors: Vec<String> = Vec::new();
+        // staff
+        for person in persons {
+            if person.relation == "导演" {
+                directors.push(person.name);
+            } else if person.relation == "脚本" {
+                credits.push(person.name);
             }
         }
         let rc_directors = Rc::from(directors);
         let rc_credits = Rc::from(credits);
 
-        for be in bgm_data.episodes {
+        for be in episodes {
             if !be.is_empty() {
                 let is_sp = be.episode_type == EpisodeType::Sp;
                 data.tvshow.has_sp = data.tvshow.has_sp || is_sp;
@@ -97,7 +98,8 @@ impl From<BgmAnime> for AnimeData {
                     directors: Rc::clone(&rc_directors),
                     credits: Rc::clone(&rc_credits),
                     premiered: String::from(&data.tvshow.premiered),
-                    status: Some(format!("{:?}", be.status)),
+                    // New bangumi api has no status.
+                    status: None,
                     aired: Some(be.airdate),
                     studio: None,
                     actors: Rc::clone(&data.tvshow.actors),

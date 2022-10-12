@@ -1,9 +1,37 @@
 use crate::logger::indent_display;
 use serde::Deserialize;
-use serde_repr::Deserialize_repr;
-use std::fmt;
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use std::{collections::HashMap, error, fmt};
 
-#[derive(Deserialize_repr, Debug)]
+const BGM_WEB: &str = "https://bgm.tv";
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum BgmErrorDetail {
+    Str(String),
+    Map(HashMap<String, String>),
+}
+
+#[derive(Deserialize, Debug)]
+pub struct BgmError {
+    pub title: String,
+    pub description: String,
+    pub details: BgmErrorDetail,
+}
+
+impl fmt::Display for BgmError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "[{}] {}\n* {:?}",
+            self.title, self.description, self.details
+        )
+    }
+}
+
+impl error::Error for BgmError {}
+
+#[derive(Deserialize_repr, Debug, Serialize_repr)]
 #[repr(u32)]
 pub enum SubjectType {
     Book = 1,
@@ -48,6 +76,7 @@ pub struct SubjectRatingCount {
 
 #[derive(Deserialize, Debug)]
 pub struct SubjectRating {
+    pub rank: u32,
     pub total: u32,
     pub score: f64,
     pub count: SubjectRatingCount,
@@ -63,17 +92,33 @@ pub struct SubjectCollection {
 }
 
 #[derive(Deserialize, Debug)]
+pub struct Tag {
+    pub name: String,
+    pub count: u32,
+}
+
+/// Subject in search.
+#[derive(Deserialize, Debug)]
 pub struct SubjectBase {
     pub id: u32,
-    pub url: String,
     #[serde(rename = "type")]
-    pub subject_type: SubjectType,
+    pub subject_type: Option<SubjectType>,
     pub name: String,
     pub name_cn: String,
     pub summary: String,
-    pub air_date: String,
-    pub air_weekday: u8,
-    pub images: Option<SubjectImage>,
+    pub date: String,
+    pub score: f32,
+    pub rank: u32,
+    pub images: Option<String>,
+    #[serde(default)]
+    pub tags: Vec<Tag>,
+}
+
+/// New subjectbase has no url field.
+impl SubjectBase {
+    fn url(&self) -> String {
+        format!("{}/subject/{}", BGM_WEB, self.id)
+    }
 }
 
 impl fmt::Display for SubjectBase {
@@ -82,72 +127,81 @@ impl fmt::Display for SubjectBase {
         let strings = vec![
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}  Subject ID: {}", prefix, self.id),
-            format!("{}  Air Date: {}", prefix, self.air_date),
-            format!("{}  URL: {}", prefix, self.url),
+            format!("{}  Air Date: {}", prefix, self.date),
+            format!("{}  URL: {}", prefix, self.url()),
         ];
         write!(f, "{}", strings.join("\n"))
     }
 }
 
+/// There is no SubjectMedium/Base or else.
+/// infobox is too big and contains things we don't need.
+/// volumes is for book, has no relations with anime.
 #[derive(Deserialize, Debug)]
-pub struct SubjectMedium {
+pub struct Subject {
     pub id: u32,
-    pub url: String,
     #[serde(rename = "type")]
     pub subject_type: SubjectType,
     pub name: String,
     pub name_cn: String,
     pub summary: String,
-    pub air_date: String,
-    pub air_weekday: u8,
+    pub nsfw: bool,
+    pub date: String,
+    /// TV, Web, 欧美剧, PS4...
+    pub platform: String,
     pub images: Option<SubjectImage>,
     pub eps: Option<u32>,
-    pub eps_count: Option<u32>,
+    pub total_episodes: Option<u32>,
     pub rating: SubjectRating,
-    pub rank: Option<u32>,
     pub collection: SubjectCollection,
-    pub crt: Vec<Character>,
-    pub staff: Vec<Staff>,
+    #[serde(default)]
+    pub tags: Vec<Tag>,
 }
 
-impl fmt::Display for SubjectMedium {
+impl Subject {
+    pub fn url(&self) -> String {
+        format!("{}/subject/{}", BGM_WEB, self.id)
+    }
+}
+
+impl fmt::Display for Subject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = indent_display(f);
-        let crts: String = self
-            .crt
-            .iter()
-            .map(|c| c.name.as_str())
-            .collect::<Vec<&str>>()
-            .join("/");
-        let staff: String = self
-            .staff
-            .iter()
-            .map(|s| s.name.as_str())
-            .collect::<Vec<&str>>()
-            .join("/");
         let strings = vec![
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
-            format!("{}* {}", prefix, self.url),
-            format!("{}* Air Date: {}", prefix, self.air_date),
-            format!("{}* Characters: {}", prefix, crts),
-            format!("{}* Staff: {}", prefix, staff),
+            format!("{}* {}", prefix, self.url()),
+            format!("{}* Air Date: {}", prefix, self.date),
             format!("{}* {}", prefix, self.summary),
         ];
         write!(f, "{}", strings.join("\n"))
     }
 }
 
+// Bgm api doc list this as Person, but has different fields.
+// So i think they should use different struct.
+#[derive(Deserialize, Debug)]
+pub struct Actor {
+    pub id: u32,
+    pub name: String,
+    #[serde(rename = "type")]
+    pub actor_type: PersonType,
+    #[serde(default)]
+    pub career: Vec<PersonCareer>,
+    pub short_summary: String,
+    pub locked: bool,
+    pub images: Option<CharacterImage>,
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Character {
     pub id: u32,
-    pub url: String,
     pub name: String,
+    #[serde(rename = "type")]
+    pub character_type: u32,
     pub images: CharacterImage,
-    pub name_cn: String,
-    pub comment: u32,
-    pub collects: u32,
-    pub actors: Option<Vec<Actor>>,
-    pub role_name: String, // example: 主角
+    pub relation: String,
+    #[serde(default)]
+    pub actors: Vec<Actor>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -158,25 +212,59 @@ pub struct CharacterImage {
     pub grid: String,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Actor {
-    pub id: u32,
-    pub url: String,
-    pub name: String,
-    pub images: Option<CharacterImage>,
+pub struct Characters(pub Vec<Character>);
+
+impl fmt::Display for Characters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut names: Vec<&str> = self.0.iter().map(|p| p.name.as_str()).collect();
+        names.sort();
+        names.dedup();
+        let prefix = indent_display(f);
+        write!(f, "{}* characters: {}", prefix, names.join("/"))
+    }
+}
+
+#[derive(Deserialize_repr, Debug)]
+#[repr(u32)]
+pub enum PersonType {
+    Person = 1,
+    Company = 2,
+    Group = 3,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Staff {
+#[serde(rename_all = "lowercase")]
+pub enum PersonCareer {
+    Producer,
+    Mangaka,
+    Artist,
+    Seiyu,
+    Writer,
+    Illustrator,
+    Actor,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Person {
     pub id: u32,
-    pub url: String,
-    pub name: String,
     pub images: Option<CharacterImage>,
-    pub name_cn: String,
-    pub comment: u32,
-    pub collects: u32,
-    pub role_name: String,
-    pub jobs: Vec<String>,
+    #[serde(rename = "type")]
+    pub person_type: PersonType,
+    pub career: Vec<PersonCareer>,
+    pub name: String,
+    pub relation: String,
+}
+
+pub struct Persons(pub Vec<Person>);
+
+impl fmt::Display for Persons {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut names: Vec<&str> = self.0.iter().map(|p| p.name.as_str()).collect();
+        names.sort();
+        names.dedup();
+        let prefix = indent_display(f);
+        write!(f, "{}* staff: {}", prefix, names.join("/"))
+    }
 }
 
 #[derive(Deserialize_repr, PartialEq, Eq, Debug)]
@@ -215,9 +303,9 @@ pub enum EpisodeStatus {
 #[derive(Deserialize, Debug)]
 pub struct Episode {
     pub id: u32,
-    pub url: String,
     #[serde(rename = "type")]
     pub episode_type: EpisodeType,
+    pub ep: Option<u32>,
     pub sort: f64,
     pub name: String,
     pub name_cn: String,
@@ -225,12 +313,13 @@ pub struct Episode {
     pub airdate: String,
     pub comment: u32,
     pub desc: String,
-    pub status: EpisodeStatus,
+    /// Disc is for music. ignore it.
+    pub duration_seconds: Option<u32>,
 }
 
 impl Episode {
     pub fn is_empty(&self) -> bool {
-        self.status == EpisodeStatus::NA && self.name.is_empty() && self.name_cn.is_empty()
+        self.name.is_empty() && self.name_cn.is_empty()
     }
 }
 

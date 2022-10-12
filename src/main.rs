@@ -50,17 +50,25 @@ async fn main() -> Result<()> {
 async fn bgm_cmd(opts: BgmCmd) -> Result<()> {
     match opts.subcmd {
         BgmSubCmd::Search(search_opts) => {
-            let keyword = &search_opts.keyword.join(" ");
-            let res = bangumi::search_anime(keyword).await?;
-            info!("found {} result(s):\n", &res.results);
-            for item in res.list.iter() {
+            let keyword = search_opts.keyword.join(" ");
+            let res = bangumi::search_anime(&keyword).await?;
+            info!("found {} result(s):\n", res.data.len());
+            for item in res.data {
                 info!("{:>1}", item);
             }
             Ok(())
         }
         BgmSubCmd::Get(get_opts) => {
-            let subject = bangumi::get_subject_info(get_opts.id).await?;
+            let subject = bangumi::get_subject(get_opts.id).await?;
             info!("{}", &subject);
+            if !get_opts.no_persons {
+                let persons = bangumi::get_subject_persons(get_opts.id).await?;
+                info!("{}", persons);
+            }
+            if !get_opts.no_characters {
+                let characters = bangumi::get_subject_characters(get_opts.id).await?;
+                info!("{}", characters);
+            }
             Ok(())
         }
         BgmSubCmd::GetEp(get_opts) => {

@@ -50,14 +50,20 @@ pub enum BgmSubCmd {
 
 #[derive(Parser)]
 pub struct BgmSearchOpt {
-    #[clap(help = "search keyword")]
+    /// search keywords.
     pub keyword: Vec<String>,
 }
 
 #[derive(Parser)]
 pub struct BgmGetSubjectOpt {
-    #[clap(help = "subject id")]
+    /// subject id. can get from search.
     pub id: u32,
+    /// doesn't get person(staff) infomation.
+    #[clap(long)]
+    pub no_persons: bool,
+    /// doesn't get characters infomation.
+    #[clap(long)]
+    pub no_characters: bool,
 }
 
 #[derive(Parser)]
