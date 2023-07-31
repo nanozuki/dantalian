@@ -56,10 +56,15 @@ impl Job {
         }
         let caps = config.episode_re.captures(file_name);
         let Some(matched_ep) = caps.as_ref().and_then(|c| c.name("ep")) else { return Ok(None) };
-        let ep: String = String::from(match matched_ep.as_str().trim_start_matches('0') {
+        let ep_str = match matched_ep.as_str().trim_start_matches('0') {
             "" => "0",
             ep_str => ep_str,
-        });
+        };
+        let ep = match (config.episode_offset, ep_str.find('.')) {
+            (0, _) => ep_str.to_string(),
+            (offset, Some(_)) => (ep_str.parse::<f64>().unwrap() + offset as f64).to_string(),
+            (offset, None) => (ep_str.parse::<i32>().unwrap() + offset).to_string(),
+        };
         let sp = caps
             .and_then(|c| c.name("sp"))
             .map_or(false, |mat| mat.as_str() != "");
