@@ -60,10 +60,11 @@ impl Job {
             "" => "0",
             ep_str => ep_str,
         };
-        let ep = match (config.episode_offset, ep_str.find('.')) {
-            (0, _) => ep_str.to_string(),
-            (offset, Some(_)) => (ep_str.parse::<f64>().unwrap() + offset as f64).to_string(),
-            (offset, None) => (ep_str.parse::<i32>().unwrap() + offset).to_string(),
+        let ep = match config.episode_offset {
+            0 => ep_str.to_string(),
+            offset => ep_str
+                .parse::<f64>()
+                .map_or_else(|s| s.to_string(), |e| (e + offset as f64).to_string()),
         };
         let sp = caps
             .and_then(|c| c.name("sp"))
