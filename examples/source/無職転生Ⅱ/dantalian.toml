@@ -1,0 +1,2 @@
+subject_id = 373247
+episode_re = "^(?P<name>無職転生Ⅱ) (?P<sp>SP)?(?P<ep>[.\\d]+)\\."

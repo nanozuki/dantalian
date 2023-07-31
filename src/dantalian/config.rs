@@ -12,12 +12,14 @@ use std::path::Path;
 struct ConfigFile {
     subject_id: u32,
     episode_re: Option<String>,
+    episode_offset: Option<i32>,
 }
 
 #[derive(Debug)]
 pub struct Config {
     pub subject_id: u32,
     pub episode_re: Regex,
+    pub episode_offset: i32,
 }
 
 const DIR_CONFIG_NAME: &str = "dantalian.toml";
@@ -37,20 +39,20 @@ impl Config {
         info!(ind: 2, "Parse config file");
         let file = std::fs::read_to_string(filepath)?;
         let cf: ConfigFile = toml::from_str(file.as_ref())?;
-        match cf.episode_re {
-            Some(re) => Ok(Config {
-                subject_id: cf.subject_id,
-                episode_re: Regex::new(&re)?,
-            }),
+        let episode_re = match cf.episode_re {
+            Some(re) => Regex::new(&re)?,
             None => {
                 let subject = get_subject(cf.subject_id).await?;
                 let name_qry = format!("{}|{}", subject.name, subject.name_cn);
-                Ok(Config {
-                    subject_id: cf.subject_id,
-                    episode_re: default_ep_regex(&name_qry)?,
-                })
+                default_ep_regex(&name_qry)?
             }
-        }
+        };
+        let episode_offset = cf.episode_offset.unwrap_or(0);
+        Ok(Config {
+            subject_id: cf.subject_id,
+            episode_re,
+            episode_offset,
+        })
     }
 
     async fn parse_from_dirname(path: &Path) -> Result<Config> {
@@ -70,6 +72,7 @@ impl Config {
                 Ok(Config {
                     subject_id: subjects[0].id,
                     episode_re: default_ep_regex(&name)?,
+                    episode_offset: 0,
                 })
             }
             None => bail!("invalid name"),
@@ -80,6 +83,7 @@ impl Config {
         let file_content = toml::to_string(&ConfigFile {
             subject_id: self.subject_id,
             episode_re: Some(self.episode_re.to_string()),
+            episode_offset: Some(self.episode_offset),
         })?;
         let mut f = File::create(filepath)?;
         f.write_all(&file_content.into_bytes())?;

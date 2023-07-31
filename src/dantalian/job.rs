@@ -48,21 +48,23 @@ impl Job {
             // if this file is not video file, skip it.
             return Ok(None);
         }
-        let file_name = match file_entry.file_name().to_str() {
-            Some(f) => f,
-            None => return Ok(None),
-        };
+        let Some(file_name) = file_entry.file_name().to_str() else { return Ok(None) };
         let nfo_file_path = file_entry.path().with_extension("nfo");
         if (!force) && nfo_file_path.exists() {
             // nfo file of current file already exists, don't need a job
             return Ok(None);
         }
         let caps = config.episode_re.captures(file_name);
-        let ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
-            Some(ep_match) => {
-                String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0'))
-            }
-            None => return Ok(None),
+        let Some(matched_ep) = caps.as_ref().and_then(|c| c.name("ep")) else { return Ok(None) };
+        let ep_str = match matched_ep.as_str().trim_start_matches('0') {
+            "" => "0",
+            ep_str => ep_str,
+        };
+        let ep = match config.episode_offset {
+            0 => ep_str.to_string(),
+            offset => ep_str
+                .parse::<f64>()
+                .map_or_else(|s| s.to_string(), |e| (e + offset as f64).to_string()),
         };
         let sp = caps
             .and_then(|c| c.name("sp"))
