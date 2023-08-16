@@ -198,7 +198,7 @@ pub struct Character {
     pub name: String,
     #[serde(rename = "type")]
     pub character_type: u32,
-    pub images: CharacterImage,
+    pub images: Option<CharacterImage>,
     pub relation: String,
     #[serde(default)]
     pub actors: Vec<Actor>,
