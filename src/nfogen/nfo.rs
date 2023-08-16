@@ -144,7 +144,7 @@ impl Movie {
                     name: character.name,
                     role: String::from("N/A"),
                     order: actors.len() as u32,
-                    thumb: character.images.large,
+                    thumb: character.images.map_or(String::from(""), |ci| ci.large),
                 });
             } else {
                 for actor in character.actors {
@@ -152,7 +152,10 @@ impl Movie {
                         name: character.name.clone(),
                         role: actor.name,
                         order: actors.len() as u32,
-                        thumb: character.images.large.clone(),
+                        thumb: character
+                            .images
+                            .as_ref()
+                            .map_or(String::from(""), |ci| ci.large.clone()),
                     });
                 }
             }
