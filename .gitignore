@@ -19,3 +19,7 @@
 !examples/source/[dantalian][202104][奇巧计程车ODD TAXI][01-13合集][BDRip][1080p]/dantalian.toml
 examples/source/**/*.nfo
 examples/source/**/*.toml
+
+# direnv
+.direnv/
+.envrc
