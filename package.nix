@@ -1,18 +1,19 @@
 {
   lib,
-  fetchFromGitHub,
   rustPlatform,
   openssl,
   pkg-config,
 }:
 
-rustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage {
   pname = "dantalian";
   version = "0.4.5";
 
   cargoLock = {
     lockFile = ./Cargo.lock;
   };
+
+  src = ./.;
 
   buildInputs = [ openssl ];
   nativeBuildInputs = [ pkg-config ];
