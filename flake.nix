@@ -33,6 +33,9 @@
             rust-analyzer
           ];
         };
+        packages.dantalian = pkgs.callPackage ./package.nix { };
+        packages.default = self'.packages.dantalian;
+
       };
       flake = {
         # The usual flake attributes can be defined here, including system-
