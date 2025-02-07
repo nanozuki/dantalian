@@ -29,6 +29,8 @@
         };
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            pkg-config
+            openssl
             (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
             rust-analyzer
           ];
