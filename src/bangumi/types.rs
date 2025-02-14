@@ -124,7 +124,7 @@ impl SubjectBase {
 impl fmt::Display for SubjectBase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = indent_display(f);
-        let strings = vec![
+        let strings = [
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}  Subject ID: {}", prefix, self.id),
             format!("{}  Air Date: {}", prefix, self.date),
@@ -167,7 +167,7 @@ impl Subject {
 impl fmt::Display for Subject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = indent_display(f);
-        let strings = vec![
+        let strings = [
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}* {}", prefix, self.url()),
             format!("{}* Air Date: {}", prefix, self.date),
