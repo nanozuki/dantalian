@@ -48,14 +48,18 @@ impl Job {
             // if this file is not video file, skip it.
             return Ok(None);
         }
-        let Some(file_name) = file_entry.file_name().to_str() else { return Ok(None) };
+        let Some(file_name) = file_entry.file_name().to_str() else {
+            return Ok(None);
+        };
         let nfo_file_path = file_entry.path().with_extension("nfo");
         if (!force) && nfo_file_path.exists() {
             // nfo file of current file already exists, don't need a job
             return Ok(None);
         }
         let caps = config.episode_re.captures(file_name);
-        let Some(matched_ep) = caps.as_ref().and_then(|c| c.name("ep")) else { return Ok(None) };
+        let Some(matched_ep) = caps.as_ref().and_then(|c| c.name("ep")) else {
+            return Ok(None);
+        };
         let ep_str = match matched_ep.as_str().trim_start_matches('0') {
             "" => "0",
             ep_str => ep_str,

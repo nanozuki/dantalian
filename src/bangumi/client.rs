@@ -33,7 +33,7 @@ struct SearchSubjectRequest<'a> {
     pub filter: SearchSubjectFilter,
 }
 
-impl<'a> BangumiRequest for SearchSubjectRequest<'a> {
+impl BangumiRequest for SearchSubjectRequest<'_> {
     fn uri(&self) -> Result<Uri> {
         Ok(Uri::from_str(&[BASE_URL, "/search/subjects"].concat())?)
     }
