@@ -1,7 +1,7 @@
 use crate::bangumi::{get_subject, get_subject_characters};
 use crate::dantalian::Config;
-use crate::nfogen::nfo::{Movie, MOVIE_NFO_NAME};
 use crate::nfogen::Generator;
+use crate::nfogen::nfo::{MOVIE_NFO_NAME, Movie};
 use crate::{error, info};
 use anyhow::{Context, Result};
 use std::fs::File;

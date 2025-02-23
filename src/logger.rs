@@ -1,4 +1,4 @@
-use log::{set_max_level, LevelFilter, Metadata, Record};
+use log::{LevelFilter, Metadata, Record, set_max_level};
 
 #[derive(Debug)]
 pub struct Logger {}

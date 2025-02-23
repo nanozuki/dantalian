@@ -1,6 +1,6 @@
 use crate::bangumi::{get_subject, search_anime};
 use crate::info;
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};

@@ -1,6 +1,6 @@
 use super::config::Config;
 use super::utils::is_video_file;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 
@@ -72,7 +72,7 @@ impl Job {
         };
         let sp = caps
             .and_then(|c| c.name("sp"))
-            .map_or(false, |mat| mat.as_str() != "");
+            .is_some_and(|mat| mat.as_str() != "");
         Ok(Some(EpisodeJob {
             index: ep,
             is_sp: sp,
