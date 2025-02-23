@@ -31,7 +31,6 @@ async fn main() -> Result<()> {
     match subcmd {
         None => {
             let force: HashSet<String> = HashSet::from_iter(force);
-            let force_all = force_all;
             let is_force = |path| force_all || force.contains(&path);
             for source in source {
                 dantalian(&source, &is_force).await?;
