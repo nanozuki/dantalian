@@ -9,6 +9,9 @@ repository = "https://github.com/nanozuki/dantalian/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+vendored = ["reqwest/native-tls-vendored"]
+
 [dependencies]
 clap = { version = "3.1.18", features = [
     "derive",
