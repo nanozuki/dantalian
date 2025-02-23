@@ -83,6 +83,7 @@ impl From<BgmAnime> for AnimeData {
         }
         let rc_directors = Rc::from(directors);
         let rc_credits = Rc::from(credits);
+        let episode_len = episodes.len();
 
         for be in episodes {
             if !be.is_empty() {
@@ -106,7 +107,28 @@ impl From<BgmAnime> for AnimeData {
                     aired: Some(be.airdate),
                     studio: None,
                     actors: Rc::clone(&data.tvshow.actors),
-                })
+                });
+            } else if episode_len == 1 && be.episode_type == EpisodeType::Honpen && be.ep == Some(1)
+            {
+                data.episodes.push(Episode {
+                    uid: be.id,
+                    title: data.tvshow.title.clone(),
+                    original_title: data.tvshow.original_title.clone(),
+                    show_title: String::from(&data.tvshow.title),
+                    rating_value: None,
+                    rating_votes: None,
+                    ep_index: format!("{}", be.sort),
+                    is_sp: false,
+                    plot: be.desc,
+                    directors: Rc::clone(&rc_directors),
+                    credits: Rc::clone(&rc_credits),
+                    premiered: String::from(&data.tvshow.premiered),
+                    // New bangumi api has no status.
+                    status: None,
+                    aired: Some(be.airdate),
+                    studio: None,
+                    actors: Rc::clone(&data.tvshow.actors),
+                });
             }
         }
         data
