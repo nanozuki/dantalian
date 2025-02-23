@@ -45,7 +45,7 @@ pub fn indent_display(f: &std::fmt::Formatter<'_>) -> &'static str {
 
 #[macro_export]
 macro_rules! info {
-    (ind: $ind:expr_2021, $($arg:tt)+) => {
+    (ind: $ind:expr, $($arg:tt)+) => {
         log::info!("{}{}", $crate::logger::indent($ind), format!($($arg)+))
     };
     ($($arg:tt)+) => {
@@ -55,7 +55,7 @@ macro_rules! info {
 
 #[macro_export]
 macro_rules! error {
-    (ind: $ind:expr_2021, $($arg:tt)+) => {
+    (ind: $ind:expr, $($arg:tt)+) => {
         log::error!("{}{}", $crate::logger::indent($ind), colored::Colorize::red(&*format!($($arg)+)))
     };
     ($($arg:tt)+) => {
@@ -65,7 +65,7 @@ macro_rules! error {
 
 #[macro_export]
 macro_rules! debug {
-    (ind: $ind:expr_2021, $($arg:tt)+) => {
+    (ind: $ind:expr, $($arg:tt)+) => {
         log::debug!("{}{}", $crate::logger::indent($ind), format!($($arg)+))
     };
     ($($arg:tt)+) => {
@@ -75,7 +75,7 @@ macro_rules! debug {
 
 #[macro_export]
 macro_rules! trace {
-    (ind: $ind:expr_2021, $($arg:tt)+) => {
+    (ind: $ind:expr, $($arg:tt)+) => {
         log::trace!("{}{}", $crate::logger::indent($ind), format!($($arg)+))
     };
     ($($arg:tt)+) => {
@@ -85,7 +85,7 @@ macro_rules! trace {
 
 #[macro_export]
 macro_rules! warn {
-    (ind: $ind:expr_2021, $($arg:tt)+) => {
+    (ind: $ind:expr, $($arg:tt)+) => {
         log::warn!("{}{}", $crate::logger::indent($ind), colored::Colorize::yellow(&*format!($($arg)+)))
     };
     ($($arg:tt)+) => {
