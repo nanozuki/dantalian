@@ -106,10 +106,9 @@ pub struct SubjectBase {
     pub name: String,
     pub name_cn: String,
     pub summary: String,
-    pub date: String,
-    pub score: f32,
-    pub rank: u32,
-    pub images: Option<String>,
+    pub date: Option<String>,
+    pub rating: SubjectRating,
+    pub images: SubjectImage,
     #[serde(default)]
     pub tags: Vec<Tag>,
 }
@@ -127,7 +126,11 @@ impl fmt::Display for SubjectBase {
         let strings = [
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}  Subject ID: {}", prefix, self.id),
-            format!("{}  Air Date: {}", prefix, self.date),
+            format!(
+                "{}  Air Date: {}",
+                prefix,
+                self.date.as_deref().unwrap_or("*")
+            ),
             format!("{}  URL: {}", prefix, self.url()),
         ];
         write!(f, "{}", strings.join("\n"))
@@ -146,7 +149,7 @@ pub struct Subject {
     pub name_cn: String,
     pub summary: String,
     pub nsfw: bool,
-    pub date: String,
+    pub date: Option<String>,
     /// TV, Web, 欧美剧, PS4...
     pub platform: String,
     pub images: Option<SubjectImage>,
@@ -170,7 +173,11 @@ impl fmt::Display for Subject {
         let strings = [
             format!("{}* {} / {}", prefix, self.name, self.name_cn),
             format!("{}* {}", prefix, self.url()),
-            format!("{}* Air Date: {}", prefix, self.date),
+            format!(
+                "{}  Air Date: {}",
+                prefix,
+                self.date.as_deref().unwrap_or("*")
+            ),
             format!("{}* {}", prefix, self.summary),
         ];
         write!(f, "{}", strings.join("\n"))

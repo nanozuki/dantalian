@@ -170,7 +170,7 @@ impl Movie {
             poster: subject.images.map(|img| img.large),
             genres: vec![],
             tags: vec![],
-            premiered: subject.date,
+            premiered: subject.date.as_deref().unwrap_or("*").to_string(),
             status: None,
             studio: None,
             // TODO: Set real date.
