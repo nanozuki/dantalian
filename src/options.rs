@@ -1,4 +1,4 @@
-use clap::{crate_authors, crate_description, crate_version, Parser, ValueHint};
+use clap::{Parser, ValueHint, crate_authors, crate_description, crate_version};
 use std::path::PathBuf;
 
 #[derive(Parser)]

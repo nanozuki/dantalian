@@ -8,7 +8,7 @@ use hyper_tls::HttpsConnector;
 use log::{debug, trace};
 use once_cell::sync::OnceCell;
 use serde::Serialize;
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{Deserialize, de::DeserializeOwned};
 use std::fmt;
 use std::str::FromStr;
 

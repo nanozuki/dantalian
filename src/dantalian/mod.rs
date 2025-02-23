@@ -1,7 +1,7 @@
 use crate::bangumi::get_anime_data;
 use crate::nfogen::{Generator, TVSHOW_NFO_NAME};
 use crate::{error, info};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use config::Config;
 use data::AnimeData;
 use job::Job;

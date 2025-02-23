@@ -1,6 +1,6 @@
 use super::config::Config;
 use super::utils::is_video_file;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 
