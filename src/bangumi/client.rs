@@ -2,19 +2,17 @@ use super::types::{
     BgmError, Character, Characters, Episode, Person, Persons, Subject, SubjectBase, SubjectType,
 };
 use anyhow::{Context, Result};
-use hyper::http::request;
-use hyper::{Body, Client, Method, Request, Uri};
-use hyper_tls::HttpsConnector;
 use log::{debug, trace};
 use once_cell::sync::OnceCell;
+use reqwest::{Body, Client, RequestBuilder, Url};
 use serde::Serialize;
 use serde::{Deserialize, de::DeserializeOwned};
 use std::fmt;
-use std::str::FromStr;
 
 pub(crate) static ACCESS_TOKEN: OnceCell<String> = OnceCell::new();
 
-const BASE_URL: &str = "https://api.bgm.tv/v0";
+// Trailing slash is necessary
+const BASE_URL: &str = "https://api.bgm.tv/v0/";
 
 pub fn set_access_token(token: String) {
     // Should only set once. Set twice is a bug.
@@ -34,8 +32,8 @@ struct SearchSubjectRequest<'a> {
 }
 
 impl BangumiRequest for SearchSubjectRequest<'_> {
-    fn uri(&self) -> Result<Uri> {
-        Ok(Uri::from_str(&[BASE_URL, "/search/subjects"].concat())?)
+    fn url(&self) -> Result<Url> {
+        Ok(Url::parse(BASE_URL)?.join("search/subjects")?)
     }
 
     fn body(&self) -> Result<Option<Body>> {
@@ -43,8 +41,8 @@ impl BangumiRequest for SearchSubjectRequest<'_> {
         Ok(Some(body))
     }
 
-    fn modify(&self, req: request::Builder) -> Result<request::Builder> {
-        Ok(req.uri(self.uri()?).method(Method::POST))
+    fn modify(&self, client: &Client) -> Result<RequestBuilder> {
+        Ok(client.post(self.url()?))
     }
 }
 
@@ -60,7 +58,7 @@ pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
             subject_type: vec![SubjectType::Anime],
         },
     };
-    trace!("request url {}", search.uri()?.to_string());
+    trace!("request url {}", search.url()?.to_string());
     let res = request(search)
         .await
         .with_context(|| "request search anime")?;
@@ -89,7 +87,7 @@ pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
 }
 
 pub async fn get_subject(id: u32) -> Result<Subject> {
-    let path = format!("/subjects/{}", id);
+    let path = format!("subjects/{}", id);
     let subject = request(path)
         .await
         .with_context(|| format!("request get subject: {}", id))?;
@@ -98,7 +96,7 @@ pub async fn get_subject(id: u32) -> Result<Subject> {
 }
 
 pub async fn get_subject_persons(id: u32) -> Result<Persons> {
-    let path = format!("/subjects/{}/persons", id);
+    let path = format!("subjects/{}/persons", id);
     let persons = request(path)
         .await
         .with_context(|| format!("request get subject persons: {}", id))?;
@@ -107,7 +105,7 @@ pub async fn get_subject_persons(id: u32) -> Result<Persons> {
 }
 
 pub async fn get_subject_characters(id: u32) -> Result<Characters> {
-    let path = format!("/subjects/{}/characters", id);
+    let path = format!("subjects/{}/characters", id);
     let characters = request(path)
         .await
         .with_context(|| format!("request get subject characters: {}", id))?;
@@ -117,7 +115,7 @@ pub async fn get_subject_characters(id: u32) -> Result<Characters> {
 
 pub async fn get_subject_episodes(id: u32) -> Result<EpisodeResponse> {
     trace!("get_subject_info: {}", id);
-    let path = format!("/episodes?subject_id={}", id);
+    let path = format!("episodes?subject_id={}", id);
     let res: EpisodeResponse = request(path)
         .await
         .with_context(|| format!("get subject episode {}", id))?;
@@ -149,16 +147,16 @@ trait BangumiRequest {
         Ok(None)
     }
 
-    fn uri(&self) -> Result<Uri>;
+    fn url(&self) -> Result<Url>;
 
-    fn modify(&self, req: request::Builder) -> Result<request::Builder> {
-        Ok(req.uri(self.uri()?).method(Method::GET))
+    fn modify(&self, client: &Client) -> Result<RequestBuilder> {
+        Ok(client.get(self.url()?))
     }
 }
 
 impl BangumiRequest for String {
-    fn uri(&self) -> Result<Uri> {
-        Ok(Uri::from_str(&[BASE_URL, self].concat())?)
+    fn url(&self) -> Result<Url> {
+        Ok(Url::parse(BASE_URL)?.join(self)?)
     }
 }
 
@@ -168,28 +166,21 @@ async fn request<T: DeserializeOwned, Req: BangumiRequest>(bgm_req: Req) -> Resu
         env!("CARGO_PKG_VERSION")
     );
 
-    let https = HttpsConnector::new();
-    let client = Client::builder().build::<_, hyper::Body>(https);
-    let mut req = Request::builder().header("User-Agent", user_agent);
+    let client = Client::builder().user_agent(user_agent).build()?;
+    let mut req_builder = bgm_req.modify(&client)?;
     if let Some(access_token) = ACCESS_TOKEN.get() {
-        req = req.header("Authorization", format!("Bearer {}", access_token));
+        req_builder = req_builder.bearer_auth(access_token);
     }
-    req = bgm_req.modify(req)?;
-    debug!(
-        "url = {}",
-        req.uri_ref()
-            .ok_or_else(|| anyhow::anyhow!("No Uri Setted."))?
-    );
     let body = bgm_req.body()?.unwrap_or_default();
-    let req = req.body(body)?;
+    req_builder = req_builder.body(body);
+    let req = req_builder.build()?;
+    debug!("url = {}", req.url());
 
-    let res = client.request(req).await.with_context(|| "get request")?;
+    let res = client.execute(req).await.with_context(|| "get request")?;
     let is_ok = res.status().is_success();
     debug!("status: {}", res.status());
 
-    let buf = hyper::body::to_bytes(res)
-        .await
-        .with_context(|| "read body")?;
+    let buf = res.bytes().await.with_context(|| "read body")?;
 
     if !is_ok {
         let err: BgmError = serde_json::from_slice(&buf).with_context(|| "deserialize error")?;
