@@ -39,6 +39,13 @@ pub struct BgmCmd {
 }
 
 #[derive(Parser)]
+pub struct BgmCmdOpt {
+    /// show more information
+    #[clap(short, long)]
+    pub verbose: bool,
+}
+
+#[derive(Parser)]
 pub enum BgmSubCmd {
     /// search subject in bangumi
     Search(BgmSearchOpt),
