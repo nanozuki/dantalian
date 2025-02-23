@@ -9,9 +9,6 @@ repository = "https://github.com/nanozuki/dantalian/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[features]
-vendored = ["hyper-tls/vendored"]
-
 [dependencies]
 clap = { version = "3.1.18", features = [
     "derive",
@@ -22,15 +19,9 @@ clap = { version = "3.1.18", features = [
 serde = { version = "1.0.137", features = ["derive", "rc"] }
 serde_json = "1.0.81"
 serde_repr = "0.1.16"
-hyper = { version = "0.14.18", features = [
-    "http1",
-    "http2",
-    "client",
-    "runtime",
-] }
-tokio = { version = "1.18.2", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
 anyhow = "1.0.57"
-hyper-tls = "0.5.0"
 tinytemplate = "1.2.1"
 walkdir = "2.3.2"
 regex = "1.5.5"
