@@ -46,8 +46,8 @@
             with pkgs;
             callPackage ./package.nix {
               rustPlatform = makeRustPlatform {
-                cargo = rust-bin.selectLatestNightlyWith (toolchain: toolchain.default);
-                rustc = rust-bin.selectLatestNightlyWith (toolchain: toolchain.default);
+                cargo = rust-bin.stable.latest.default;
+                rustc = rust-bin.stable.latest.default;
               };
             };
           packages.default = self'.packages.dantalian;
