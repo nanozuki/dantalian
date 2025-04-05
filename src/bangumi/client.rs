@@ -88,9 +88,8 @@ pub async fn get_anime_data(id: u32) -> Result<BgmAnime> {
 
 pub async fn get_subject(id: u32) -> Result<Subject> {
     let path = format!("subjects/{}", id);
-    let subject = request(path)
-        .await
-        .with_context(|| format!("request get subject: {}", id))?;
+    let subject = request(path).await?;
+    // .with_context(|| format!("request get subject: {}", id))?;
     debug!("subject: {:#?}", &subject);
     Ok(subject)
 }
@@ -177,13 +176,15 @@ async fn request<T: DeserializeOwned, Req: BangumiRequest>(bgm_req: Req) -> Resu
     debug!("url = {}", req.url());
 
     let res = client.execute(req).await.with_context(|| "get request")?;
-    let is_ok = res.status().is_success();
     debug!("status: {}", res.status());
+    let is_ok = res.status().is_success();
 
     let buf = res.bytes().await.with_context(|| "read body")?;
 
     if !is_ok {
-        let err: BgmError = serde_json::from_slice(&buf).with_context(|| "deserialize error")?;
+        let body = String::from_utf8(buf.to_vec()).unwrap_or_else(|_| "not utf8".to_string());
+        let err: BgmError =
+            serde_json::from_slice(&buf).with_context(|| format!("deserialize error: {}", body))?;
         Err(err)?;
     }
 
@@ -192,4 +193,21 @@ async fn request<T: DeserializeOwned, Req: BangumiRequest>(bgm_req: Req) -> Resu
         format!("get body: {}", body)
     })?;
     Ok(res_obj)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_subject_get() {
+        let result = get_subject(1).await.unwrap();
+        // let Ok(result) = result else {
+        //     let err = result.err().unwrap();
+
+        //     panic!("Error {}", err);
+        // };
+
+        assert_eq!(result.id, 1);
+    }
 }
