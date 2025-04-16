@@ -13,11 +13,7 @@ jobs:
         job:
           # { os, target, cargo-options, features, use-cross, toolchain }
           - { os: ubuntu-24.04, target: x86_64-unknown-linux-gnu }
-          - {
-              os: ubuntu-24.04,
-              target: x86_64-unknown-linux-musl,
-              features: vendored,
-            }
+          - { os: ubuntu-24.04, target: x86_64-unknown-linux-musl }
           - { os: macos-latest, target: x86_64-apple-darwin }
           - { os: windows-latest, target: i686-pc-windows-msvc }
           - { os: windows-latest, target: x86_64-pc-windows-msvc }
