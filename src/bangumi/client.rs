@@ -177,13 +177,15 @@ async fn request<T: DeserializeOwned, Req: BangumiRequest>(bgm_req: Req) -> Resu
     debug!("url = {}", req.url());
 
     let res = client.execute(req).await.with_context(|| "get request")?;
-    let is_ok = res.status().is_success();
     debug!("status: {}", res.status());
+    let is_ok = res.status().is_success();
 
     let buf = res.bytes().await.with_context(|| "read body")?;
 
     if !is_ok {
-        let err: BgmError = serde_json::from_slice(&buf).with_context(|| "deserialize error")?;
+        let body = String::from_utf8(buf.to_vec()).unwrap_or_else(|_| "not utf8".to_string());
+        let err: BgmError =
+            serde_json::from_slice(&buf).with_context(|| format!("deserialize error: {}", body))?;
         Err(err)?;
     }
 
