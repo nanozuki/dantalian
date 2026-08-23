@@ -312,7 +312,7 @@ pub struct Episode {
     pub id: u32,
     #[serde(rename = "type")]
     pub episode_type: EpisodeType,
-    pub ep: Option<u32>,
+    pub ep: Option<f64>,
     pub sort: f64,
     pub name: String,
     pub name_cn: String,
@@ -335,5 +335,48 @@ impl fmt::Display for Episode {
         let prefix = indent_display(f);
         let idx = format!("{:>3}{:02}", self.episode_type, self.sort);
         write!(f, "{}{:>6}: {} / {}", prefix, idx, self.name, self.name_cn)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_deserialize_episode_integer_ep() {
+        let json_data = r#"{
+            "id": 12345,
+            "type": 0,
+            "ep": 6,
+            "sort": 6.0,
+            "name": "Episode 6",
+            "name_cn": "第6话",
+            "duration": "24m",
+            "airdate": "2024-07-01",
+            "comment": 10,
+            "desc": "Description"
+        }"#;
+        let ep: Result<Episode, _> = serde_json::from_str(json_data);
+        assert!(ep.is_ok());
+        assert_eq!(ep.unwrap().ep, Some(6.0));
+    }
+
+    #[test]
+    fn test_deserialize_episode_fractional_ep() {
+        let json_data = r#"{
+            "id": 12345,
+            "type": 0,
+            "ep": 6.5,
+            "sort": 6.5,
+            "name": "Episode 6.5",
+            "name_cn": "第6.5话",
+            "duration": "24m",
+            "airdate": "2024-07-01",
+            "comment": 10,
+            "desc": "Description"
+        }"#;
+        let ep: Result<Episode, _> = serde_json::from_str(json_data);
+        assert!(ep.is_ok());
+        assert_eq!(ep.unwrap().ep, Some(6.5));
     }
 }

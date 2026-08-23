@@ -2,7 +2,6 @@ use super::{
     EPISODE_TEMPLATE, Episode, TVSHOW_TEMPLATE, TVShow,
     nfo::{MOVIE_TEMPLATE, Movie},
 };
-use crate::debug;
 use anyhow::{Context, Result};
 use tinytemplate::TinyTemplate;
 
